@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { MinusCircleIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 
-
 export default function EditableTable() {
 
   // Specifies the type of the response that will be coming in 
@@ -31,38 +30,89 @@ export default function EditableTable() {
     estimatedTime: number;
   };
 
-
   const [data, setData] = useState<SceneRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [file, setFile] = useState<File | null>(null);
 
+  const [modalConfig, setModalConfig] = useState({
+    display: false,
+    name: "",
+    fieldName: "" as keyof SceneRow,
+    scene: 0
+  });
+  const [itemToAdd, setItemToAdd] = useState("");
 
-  useEffect(()=>{
-    fetch("/api/getSchedule", {
-      method: "GET",
-    })
-    .then(res => res.json())
-    .then(data => {
-      console.log(data);
-      setData(data.scenesData);
-      setLoading(false);
-    })
-    .catch(err => console.error(err));
-
-  },[])
-
+  // // To be Used for Testing....
+  // useEffect(()=>{
+  //   fetch("/api/getSchedule", {
+  //     method: "GET",
+  //   })
+  //   .then(res => res.json())
+  //   .then(data => {
+  //     console.log(data);
+  //     setData(data.scenesData);
+  //     setLoading(false);
+  //   })
+  //   .catch(err => console.error(err));
+  // },[])
+  
 
   // When User Wants to Change Some Stuff
-  const handleChange = ( scene_number: number, field: string, value: string) => {
+  const handleChange = ( scene_number: number, field: keyof SceneRow, value: string) => {
     setData(prev =>
       prev.map(row => (row.scene_number === scene_number ? { ...row, [field]: value } : row))
     );
   };
 
-  // When User Wants to Change Some Stuff
-  const removeItem = ( scene_number: number, field: string, value: string) => {
+
+  /*
+    WHY WE USE FILTER/SPREAD INSTEAD OF PUSH/SPLICE:
+
+    ❌ fBAD - push() changes the SAME array:
+    const arr = [1, 2, 3];
+    arr.push(4);  // arr is now [1, 2, 3, 4] but it's the SAME array object
+    // React: "Same array? No change detected. Don't re-render."
+
+    ✅ GOOD - filter/spread creates a NEW array:
+    const arr = [1, 2, 3];
+    const newArr = [...arr, 4];  // This is a BRAND NEW array [1, 2, 3, 4]
+    // React: "Different array? Change detected! Re-render the UI."
+
+    SIMPLE RULE:
+    - push, splice, pop = modify original (React won't see changes)
+    - filter, map, [...arr] = create new copy (React sees changes and updates screen)
+    
+    React detects changes by comparing array references (like checking ID cards).
+    Same reference = no update. New reference = update!
+  */
+
+  const removeItem = (scene_number: number, field: keyof SceneRow, value: string) => {
     setData(prev =>
-      prev.map(row => (row.scene_number === scene_number ? { ...row, [field]: [] } : row))
+      prev.map(row => 
+        row.scene_number === scene_number 
+          ? { 
+              ...row, 
+              [field]: Array.isArray(row[field]) 
+                ? row[field].filter((item: string) => item !== value)
+                : row[field]
+            } 
+          : row
+      )
+    );
+  };
+
+  const addItem = (scene_number: number, field: keyof SceneRow, value: string) => {
+    setData(prev =>
+      prev.map(row => 
+        row.scene_number === scene_number 
+          ? { 
+              ...row, 
+              [field]: Array.isArray(row[field]) 
+                ? [...row[field], value]
+                : row[field]
+            } 
+          : row
+      )
     );
   };
 
@@ -127,6 +177,51 @@ export default function EditableTable() {
       )}
 
 
+      {/* Display the Generate Schedule Button */}
+      {file && !loading && (
+        <>
+          <button className="bg-blue-400 rounded-full w-full mb-6 p-3 text-white font-bold">Genertae the Schedule</button>
+        </>
+      )}
+
+
+      {/* Modal To Add New Items */}
+      {modalConfig.display && (
+        <>
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 mt-20 bg-white border rounded-lg shadow-lg p-6 w-80 md:w-120">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4 text-center">Add {modalConfig.name}</h2>
+            <input
+              type="text"
+              name="itemToAdd"
+              id="itemToAdd"
+              placeholder={`Add the ${modalConfig.name}`}
+              autoFocus
+              className="w-full text-center border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4"
+              onChange={(e) => setItemToAdd(e.target.value)}
+            />
+
+            <div className="flex justify-center gap-4">
+              <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+              onClick={() => {addItem(modalConfig.scene, modalConfig.fieldName, itemToAdd)}}>
+                Add
+              </button>
+              <button
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition cursor-pointer"
+                onClick={() =>
+                  setModalConfig(prev => ({
+                    ...prev,
+                    display: false,
+                  }))
+                }
+              >
+                Cancel
+              </button>
+            </div>
+          </div>                
+        </>
+      )}
+
+
       {/* Editing The Extracted Contents from Scenes */}
       {!loading && (
         <>
@@ -143,21 +238,16 @@ export default function EditableTable() {
                     { name: "Location Name", width: "w-30" },
                     { name: "Sub-Location", width: "w-30" },
                     { name: "Description", width: "w-30" },
-                    { name: "Characters", "addIcon": true, width: "w-30" },
-                    { name: "BG Talent", "addIcon": true, width: "w-30" },
-                  ].map((header) => (
+                    { name: "Characters",  width: "w-30" },
+                    { name: "BG Talent",  width: "w-30" },
+                  ].map((header,idx) => (
                     <th
-                      key={header.name}
+                      key={idx}
                       className={`border-b border-gray-300 px-3 py-2 text-left font-medium whitespace-nowrap ${header.width}`}
                     >
                       <div className="flex justify-between font-bold">
                         {header.name}
-                        {header.addIcon && (
-                          <div>
-                            <PlusCircleIcon className="w-5 h-5 mb-1 text-blue-500 cursor-pointer hover:text-blue-700 shrink-0" />
-                          </div>
-                        )}
-                        </div>
+                      </div>
                     </th>
                   ))}
                 </tr>
@@ -248,6 +338,22 @@ export default function EditableTable() {
 
                     {/* Displaying the Characters */}
                     <td className="px-3 py-2">
+
+                      {/* To add new Items */}
+                      <div key={idx} className="flex justify-between">
+                        <p className="mr-2">{""}</p>
+                        <PlusCircleIcon className="w-5 h-5 mb-1 text-blue-500 cursor-pointer hover:text-blue-700 shrink-0"
+                        onClick={() =>
+                          setModalConfig({
+                            display: true,
+                            name: "Characters",
+                            fieldName: "characters",
+                            scene: row.scene_number
+                          })
+                        }>
+                        </PlusCircleIcon>
+                      </div>
+
                       {row.characters.map((character,idx) => {
                         return(
                           <div key={idx} className="flex justify-between">
@@ -261,6 +367,22 @@ export default function EditableTable() {
 
                     {/* Displaying the Extra Characters */}
                     <td className="px-3 py-2">
+
+                      {/* To add new Items */}
+                      <div key={idx} className="flex justify-between">
+                        <p className="mr-2">{""}</p>
+                        <PlusCircleIcon className="w-5 h-5 mb-1 text-blue-500 cursor-pointer hover:text-blue-700 shrink-0"
+                        onClick={() =>
+                          setModalConfig({
+                            display: true,
+                            name: "BG Talent",
+                            fieldName: "extras",
+                            scene: row.scene_number
+                          })
+                        }>
+                        </PlusCircleIcon>
+                      </div>
+
                       {row.extras.map((extra,idx) => {
                         return(
                           <div key={idx} className="flex justify-between">
@@ -278,7 +400,7 @@ export default function EditableTable() {
             </table>
           </div>
 
-          <pre className="mt-4 overflow-x-scroll">{JSON.stringify(data, null, 2)}</pre>
+          {/* <pre className="mt-4 overflow-x-scroll">{JSON.stringify(data, null, 2)}</pre> */}
 
         </>
       )}        
