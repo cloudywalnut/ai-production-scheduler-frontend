@@ -1,0 +1,25 @@
+npx create-next-app@latest my-app
+
+This is the file structure that should be used...
+Next.js apparently manages routing and other stuff internally
+
+my-next-app/
+├─ app/
+│   ├─ layout.js          # Root layout (shared across all pages)
+│   ├─ page.js            # Homepage
+│   ├─ about/
+│   │   └─ page.js        # /about page
+│   ├─ contact/
+│   │   └─ page.js        # /contact page
+│   └─ api/               # All API endpoints
+│       ├─ hello/
+│       │   └─ route.js   # /api/hello
+│       └─ users/
+│           └─ route.js   # /api/users
+├─ public/                # Static files (images, icons, fonts)
+│   └─ logo.png
+├─ styles/                # Optional CSS folder
+│   └─ globals.css
+├─ next.config.js
+├─ package.json
+└─ ...other config files
