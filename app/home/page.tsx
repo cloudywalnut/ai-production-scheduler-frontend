@@ -64,6 +64,28 @@ export default function EditableTable() {
     );
   };
 
+  // When characters or props need to change - Needs to Optimize
+  const handleChangeArray = (
+    scene_number: number,
+    field: keyof SceneRow,
+    index: number,
+    value: string
+  ) => {      
+    setData(prev =>
+      prev.map(row => {
+        if (row.scene_number !== scene_number) return row;
+
+        const updatedArray = [...(row[field] as string[])];
+        updatedArray[index] = value;
+
+        return {
+          ...row,
+          [field]: updatedArray
+        };
+      })
+    );
+  };
+
 
   /*
     WHY WE USE FILTER/SPREAD INSTEAD OF PUSH/SPLICE:
@@ -357,7 +379,11 @@ export default function EditableTable() {
                       {row.characters.map((character,idx) => {
                         return(
                           <div key={idx} className="flex justify-between">
-                            <p className="mr-2">{character}</p>
+                            <input type ="text" className="mr-2 min-w-0 border-b focus:outline-none" value={character}
+                            onChange={e =>
+                              handleChangeArray(row.scene_number, "characters", idx, e.target.value)
+                            }
+                            />
                             <MinusCircleIcon className="w-5 h-5 mb-1 text-red-500 cursor-pointer
                              hover:text-red-700 shrink-0" onClick={() => removeItem(row.scene_number, "characters", character)}/>
                           </div>
@@ -386,7 +412,11 @@ export default function EditableTable() {
                       {row.extras.map((extra,idx) => {
                         return(
                           <div key={idx} className="flex justify-between">
-                            <p className="mr-2">{extra}</p>
+                            <input type ="text" className="mr-2 min-w-0 border-b focus:outline-none" value={extra}
+                            onChange={e =>
+                              handleChangeArray(row.scene_number, "extras", idx, e.target.value)
+                            }
+                            />
                             <MinusCircleIcon className="w-5 h-5 mb-1 text-red-500 cursor-pointer
                              hover:text-red-700 shrink-0" onClick={() => removeItem(row.scene_number, "extras", extra)}/>
                           </div>
