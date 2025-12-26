@@ -42,19 +42,19 @@ export default function EditableTable() {
   });
   const [itemToAdd, setItemToAdd] = useState("");
 
-  // To be Used for Testing....
-  useEffect(()=>{
-    fetch("/api/getSchedule", {
-      method: "GET",
-    })
-    .then(res => res.json())
-    .then(data => {
-      console.log(data);
-      setData(data.scenesData);
-      setLoading(false);
-    })
-    .catch(err => console.error(err));
-  },[])
+  // // To be Used for Testing....
+  // useEffect(()=>{
+  //   fetch("/api/getSchedule", {
+  //     method: "GET",
+  //   })
+  //   .then(res => res.json())
+  //   .then(data => {
+  //     console.log(data);
+  //     setData(data.scenesData);
+  //     setLoading(false);
+  //   })
+  //   .catch(err => console.error(err));
+  // },[])
   
 
   // When User Wants to Change Some Stuff
