@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { MinusCircleIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
+import { MinusCircleIcon, PlusCircleIcon, TrashIcon, ArrowsUpDownIcon  } from "@heroicons/react/24/outline";
 import Image from "next/image";
 
 export default function EditableTable() {
@@ -11,10 +11,10 @@ export default function EditableTable() {
     id: number; // unique key for your table
     scene_number: number;
     scene_heading: string;
-    location_type: "EXT" | "INT";
+    location_type: string;
     location_name: string;
     sub_location_name: string;
-    time_of_day: "DAY" | "NIGHT";
+    time_of_day: string;
     characters: string[];
     props: string[];
     wardrobe: string[];
@@ -42,19 +42,19 @@ export default function EditableTable() {
   });
   const [itemToAdd, setItemToAdd] = useState("");
 
-  // // To be Used for Testing....
-  // useEffect(()=>{
-  //   fetch("/api/getSchedule", {
-  //     method: "GET",
-  //   })
-  //   .then(res => res.json())
-  //   .then(data => {
-  //     console.log(data);
-  //     setData(data.scenesData);
-  //     setLoading(false);
-  //   })
-  //   .catch(err => console.error(err));
-  // },[])
+  // To be Used for Testing....
+  useEffect(()=>{
+    fetch("/api/getSchedule", {
+      method: "GET",
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log(data);
+      setData(data.scenesData);
+      setLoading(false);
+    })
+    .catch(err => console.error(err));
+  },[])
   
 
   // When User Wants to Change Some Stuff
@@ -139,11 +139,44 @@ export default function EditableTable() {
   };
 
 
+  const addScene = () => {
+    setData(prev => [
+      {
+        id: Date.now(),                // unique key
+        scene_number: prev.length + 1, // auto increment
+        scene_heading: "",
+        location_type: "",          // default
+        location_name: "",
+        sub_location_name: "",
+        time_of_day: "",            // default
+        characters: [],
+        props: [],
+        wardrobe: [],
+        set_dressing: [],
+        vehicles: [],
+        vfx: [],
+        sfx: [],
+        stunts: [],
+        extras: [],
+        lines_count: 0,
+        page_estimate: 0,
+        scene_summary: "",
+        estimatedTime: 0
+      },
+      ...prev,
+    ]);
+  };
+
+  const deleteScene = (scene_to_remove: number) => {
+    setData(prev  => prev.filter(scene => scene.scene_number != scene_to_remove))
+  }
+
   // When Script is Uploaded
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return; // no file selected
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
+    setLoading(true);
 
     const formData = new FormData();
     formData.append("script", selectedFile); // key must match server-side multer field
@@ -158,6 +191,12 @@ export default function EditableTable() {
       setLoading(false);
     })
     .catch(err => console.error(err));
+  };
+
+  const orderScenes = () => {
+    setData(prev =>
+      [...prev].sort((a, b) => a.scene_number - b.scene_number)
+    );
   };
 
 
@@ -202,7 +241,13 @@ export default function EditableTable() {
       {/* Display the Generate Schedule Button */}
       {file && !loading && (
         <>
-          <button className="bg-blue-400 rounded-full w-full mb-6 p-3 text-white font-bold">Genertae the Schedule</button>
+          <div className="flex justify-between gap-2">
+            <button className="bg-green-400 hover:bg-green-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer">Save Scenes</button>
+            <button className="bg-yellow-400 hover:bg-yellow-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
+            onClick={addScene}
+            >Add Scene</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer">Genertae Schedule</button>
+          </div>
         </>
       )}
 
@@ -254,7 +299,8 @@ export default function EditableTable() {
               <thead className="bg-gray-100">
                 <tr>
                   {[
-                    { name: "Scene #", width: "w-20" },
+                    { name: "Delete", width: "w-10" },
+                    { name: "Scene", width: "w-20", icon: true },
                     { name: "Location Type", width: "w-20" },
                     { name: "Time of Day", width: "w-20" },
                     { name: "Location Name", width: "w-30" },
@@ -269,6 +315,13 @@ export default function EditableTable() {
                     >
                       <div className="flex justify-between font-bold">
                         {header.name}
+                        {header.icon && (
+                          <>
+                          <ArrowsUpDownIcon className="w-5 h-5 mb-1 text-black cursor-pointer"
+                          onClick={orderScenes}
+                          />
+                          </>
+                        )}
                       </div>
                     </th>
                   ))}
@@ -281,6 +334,13 @@ export default function EditableTable() {
                     key={idx}
                     className="odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition"
                   >
+
+                    {/* Scene Number */}
+                    <td className="px-3 py-2">
+                        <TrashIcon className="w-5 h-5 m-auto mb-1 text-red-500 hover:text-red-700 cursor-pointer"
+                        onClick={() => deleteScene(row.scene_number)}
+                        ></TrashIcon>
+                    </td>
 
                     {/* Scene Number */}
                     <td className="px-3 py-2">
