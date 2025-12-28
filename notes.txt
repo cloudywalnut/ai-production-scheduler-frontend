@@ -23,3 +23,6 @@ my-next-app/
 ├─ next.config.js
 ├─ package.json
 └─ ...other config files
+
+- Add new scripts to dropdown immediately after a script is saved
+- Add a button to delete previously saved scripts as well
