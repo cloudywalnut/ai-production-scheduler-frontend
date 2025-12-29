@@ -248,7 +248,6 @@ export default function Home() {
             alt="Loading"
             width={60}
             height={60}
-            priority
           />
           <p className="mt-2 text-gray-700 text-center">
             Please wait while we are processing your script
