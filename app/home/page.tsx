@@ -8,6 +8,7 @@ import Image from "next/image";
 import { SceneRow, AddItemModalType } from "../types/types";
 import EditableTable from "./table";
 import AddItemModal from "./addItemModal";
+import { ArrowLeftEndOnRectangleIcon   } from "@heroicons/react/24/outline";
 
 export default function Home() {
 
@@ -57,6 +58,14 @@ export default function Home() {
     getScripts();
   }, [user])
 
+  // signing out the user
+  async function signOut() {
+    const { error } = await supabase.auth.signOut()
+    if (!error){
+      console.log('Signed Out')
+    }
+    router.replace('/');
+  }
 
   // save new scripts and updated ones too
   const saveScript = async () =>{
@@ -81,6 +90,19 @@ export default function Home() {
         ]);
     }
     alert("Congrats Your Script has Been Saved Successfully");  
+  }
+
+  const deleteScript = async () =>{
+    await supabase
+      .from('Scripts')
+      .delete()
+      .eq('id', currentScriptId);
+
+    setSavedScripts(prev => prev.filter(script => Number(script.id) != currentScriptId)) // updating in place else it will update only on reload
+    setScenesData([]);
+    setCurrentScriptId(null);
+    setLoading(true);
+    alert("Your Script has Been Deleted Successfully");  
   }
 
 
@@ -155,10 +177,14 @@ export default function Home() {
 
     <div className="p-6">
 
-      <h1 className="text-2xl font-semibold mb-4">Scene Breakdown</h1>
+      <div className="flex justify-between">
+        <h1 className="text-2xl font-semibold mb-4">AI Script Scheduler</h1>
+        <ArrowLeftEndOnRectangleIcon className="w-7 h-7 mb-1 text-red-500 cursor-pointer
+          hover:text-red-700 shrink-0" onClick={signOut}/>
+      </div>
 
       {/* Uploading The files  - Need a fix in here as the input is only take from a very small area */}
-      <div className="relative text-center border-2 border-dashed border-gray-300 rounded-lg mb-3 p-6 cursor-pointer hover:border-blue-400 transition">
+      <div className="relative text-center border-2 border-dashed border-gray-700 rounded-lg mb-3 p-6 cursor-pointer hover:border-blue-400 transition">
         <input
           type="file"
           accept=".pdf"
@@ -182,10 +208,10 @@ export default function Home() {
           <h2 className="font-semibold mb-2">Select a Saved Script</h2>
           <select
             defaultValue=""
-            className="w-full border rounded px-2 py-1 mb-5"
+            className="w-full border rounded p-3 mb-5"
             onChange={(e) => loadSavedScript(Number(e.target.value))}
           >
-            <option value="" disabled>Select a script</option>
+            <option value="">Select a script</option>
 
             {savedScripts.map(script => (
               <option key={script.id} value={script.id}>
@@ -194,6 +220,23 @@ export default function Home() {
             ))}
           </select>        
         </>
+      )}
+
+
+      {/* Image to Appear when Nothing Uploaded or Selected */}
+      {!file && loading && (
+        <div className="flex flex-col justify-center items-center w-full m-auto">
+          <Image
+            src="/director.png"
+            alt="Loading"
+            width={360}
+            height={360}
+            priority
+          />
+          <p className="mt-1 text-gray-700 text-center text-2xl max-w-80 font-bold">
+            Upload a New Script or Choose A Saved Script
+          </p>
+        </div>
       )}
 
 
@@ -218,13 +261,23 @@ export default function Home() {
       {!loading && (
         <>
           <div className="flex justify-between gap-2">
+
             <button className="bg-green-400 hover:bg-green-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
             onClick={saveScript}
             >{currentScriptId ? "Update Script": "Save Script"}</button>
+
+            {currentScriptId && (
+              <button className="bg-red-400 hover:bg-red-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
+              onClick={deleteScript}
+              >Delete Script</button>              
+            )}
+
             <button className="bg-yellow-400 hover:bg-yellow-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
             onClick={addScene}
             >Add Scene</button>
+
             <button className="bg-blue-400 hover:bg-blue-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer">Genertae Schedule</button>
+
           </div>
         </>
       )}
