@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation'; // App Router
 import { supabase } from '../utils/supabase'
 import { User } from '@supabase/supabase-js';
 import Image from "next/image";
-import { SceneRow, AddItemModalType } from "../types/types";
+import { SceneRow, AddItemModalType, ShootingDay } from "../types/types";
 import EditableTable from "./table";
 import AddItemModal from "./addItemModal";
+import ScheduleView from "./schedule";
 import { ArrowLeftEndOnRectangleIcon   } from "@heroicons/react/24/outline";
+
 
 export default function Home() {
 
@@ -25,7 +27,8 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [savedScripts, setSavedScripts] = useState<{ id: string; script_name: string }[]>([]);  
   const [currentScriptId, setCurrentScriptId] = useState<number | null>(null);
-
+  const [schedule, setSchedule] = useState<ShootingDay[]>([]);
+  const [scheduleView, setScheduleView] =  useState(false);
 
   // Gets the User Authentication stuff runs initially
   useEffect(() => {
@@ -107,18 +110,24 @@ export default function Home() {
 
 
   const loadSavedScript = async (script_id: number) => {
-    const {data, error} = await supabase
-      .from('Scripts')
-      .select('script')
-      .eq('id', script_id)
-      .single(); // needed when we need one entry
-    
-      if (!error) {
-        setCurrentScriptId(script_id);
-        setScenesData(data.script); // Worked After i changed the type to jsonb
-        setLoading(false);
-      };
-  }
+    const { data, error } = await supabase
+      .from("Scripts")
+      .select("script")
+      .eq("id", script_id)
+      .single();
+
+    if (!error) {
+      setScheduleView(false)
+      
+      setCurrentScriptId(script_id);
+      setScenesData(data.script);
+      setLoading(false);
+
+      const schedule = await getSchedule(script_id);
+      setSchedule(schedule ?? []);
+
+    }
+  };
 
 
   const addScene = () => {
@@ -172,6 +181,41 @@ export default function Home() {
     })
     .catch(err => console.error(err));
   };
+
+
+  function generateSchedule(scriptId: number | null) {
+    if (scriptId === null) return;
+
+    fetch("/api/generateSchedule", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ scriptId }),
+    })
+      .then(() => {
+        alert("Congrats, The Schedule of you script is Generated Successfully");
+        getSchedule(scriptId).then((schedule) => {setSchedule(schedule ?? []);});
+      })
+      .catch(err => console.error(err));
+  }
+
+
+  async function getSchedule(scriptId: number){
+    const { data, error } = await supabase
+      .from("Scripts")
+      .select("scheduled_script")
+      .eq("id", scriptId)
+      .single();
+
+    if (error) {
+      console.log(error);
+      return null;
+    }
+
+    return data.scheduled_script;
+  }
+
 
   return (
 
@@ -259,7 +303,7 @@ export default function Home() {
       {/* Display the Generate Schedule Button */}
       {!loading && (
         <>
-          <div className="flex justify-between gap-2">
+          <div className="flex flex-wrap md:flex-nowrap gap-2">
 
             <button className="bg-green-400 hover:bg-green-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
             onClick={saveScript}
@@ -275,7 +319,22 @@ export default function Home() {
             onClick={addScene}
             >Add Scene</button>
 
-            <button className="bg-blue-400 hover:bg-blue-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer">Genertae Schedule</button>
+            {currentScriptId && (
+              <button className="bg-blue-400 hover:bg-blue-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
+              onClick={()=>{generateSchedule(currentScriptId)}}>
+              Genertae Schedule
+              </button>
+            )}
+
+            {currentScriptId && schedule.length > 0 && (
+              <button className="bg-orange-400 hover:bg-orange-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
+              onClick={ () => {
+                setScheduleView(!scheduleView);
+              }}
+              >
+              {scheduleView ? "Back To Script Editor" : "View Schedule"}
+              </button>
+            )}
 
           </div>
         </>
@@ -293,11 +352,22 @@ export default function Home() {
       {/* Editing The Extracted Contents from Scenes */}
       {user && !loading && (
 
-        <EditableTable
-          scenesData={scenesData}
-          setScenesData={setScenesData}
-          setAddItemModalConfig={setAddItemModalConfig}
-        />
+        <>
+          {!scheduleView && (
+            <EditableTable
+              scenesData={scenesData}
+              setScenesData={setScenesData}
+              setAddItemModalConfig={setAddItemModalConfig}
+            />
+          )}
+
+          {scheduleView && (
+            <ScheduleView
+              schedule = {schedule}
+            />
+          )}
+
+        </>
 
       )}        
 

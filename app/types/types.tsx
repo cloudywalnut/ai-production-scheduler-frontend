@@ -21,6 +21,17 @@ export type SceneRow = {
   estimatedTime: number;
 };
 
+export type ShootingDay = {
+  day: number;
+  totalTime: number;
+  scenes: SceneRow[];
+}
+
+export type LocationGroup = {
+  scenes: SceneRow[],
+  sceneCount: number
+};
+
 export type AddItemModalType = {
   display: boolean;
   name: string;
