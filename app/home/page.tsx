@@ -82,7 +82,7 @@ export default function Home() {
         ])
         .eq('id', currentScriptId);
     }else{
-      await supabase
+      const {data, error} = await supabase
         .from('Scripts')
         .insert([
           {
@@ -90,7 +90,16 @@ export default function Home() {
             script: scenesData,
             script_name: file?.name
           }
-        ]);
+        ]).select('id, script_name').single();
+    
+      if (error) {
+        console.error(error);
+      } else {
+        const insertedId = data.id;
+        setCurrentScriptId(insertedId);
+        setSavedScripts(prev => [...prev, data]) // updating in place else it will update only on reload
+      }
+
     }
     alert("Congrats Your Script has Been Saved Successfully");  
   }
@@ -178,6 +187,8 @@ export default function Home() {
       setScenesData(data.scenesData);
       setLoading(false);
       setCurrentScriptId(null); // Set to null here again in case someone opened an existing script during loading
+      setScheduleView(false);
+      setSchedule([]);
     })
     .catch(err => console.error(err));
   };
@@ -305,21 +316,25 @@ export default function Home() {
         <>
           <div className="flex flex-wrap md:flex-nowrap gap-2">
 
-            <button className="bg-green-400 hover:bg-green-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
-            onClick={saveScript}
-            >{currentScriptId ? "Update Script": "Save Script"}</button>
+            {!scheduleView && (
+              <button className="bg-green-400 hover:bg-green-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
+              onClick={saveScript}
+              >{currentScriptId ? "Update Script": "Save Script"}</button>
+            )}
 
-            {currentScriptId && (
+            {currentScriptId && !scheduleView && (
               <button className="bg-red-400 hover:bg-red-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
               onClick={deleteScript}
               >Delete Script</button>              
             )}
 
-            <button className="bg-yellow-400 hover:bg-yellow-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
-            onClick={addScene}
-            >Add Scene</button>
+            {!scheduleView && (
+              <button className="bg-yellow-400 hover:bg-yellow-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
+              onClick={addScene}
+              >Add Scene</button>
+            )}
 
-            {currentScriptId && (
+            {currentScriptId && !scheduleView && (
               <button className="bg-blue-400 hover:bg-blue-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
               onClick={()=>{generateSchedule(currentScriptId)}}>
               Genertae Schedule

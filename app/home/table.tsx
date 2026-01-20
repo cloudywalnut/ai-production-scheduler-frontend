@@ -87,6 +87,7 @@ export default function EditableTable({ scenesData, setScenesData, setAddItemMod
                   {[
                     { name: "Delete", width: "w-10" },
                     { name: "Scene", width: "w-20", icon: true },
+                    { name: "Est Time", width: "w-20" },
                     { name: "Location Type", width: "w-20" },
                     { name: "Time of Day", width: "w-20" },
                     { name: "Location Name", width: "w-30" },
@@ -139,6 +140,19 @@ export default function EditableTable({ scenesData, setScenesData, setAddItemMod
                         className="w-full border rounded px-2 py-1"
                       />
                     </td>
+
+                    {/* Scene Estimated Time */}
+                    <td className="px-3 py-2">
+                      <input
+                        type="number"
+                        value={row.estimatedTime}
+                        onChange={e =>
+                          handleChange(row.scene_number, "estimatedTime", e.target.value)
+                        }
+                        className="w-full border rounded px-2 py-1"
+                      />
+                    </td>
+
 
                     {/* Location Type */}
                     <td className="px-3 py-2">
