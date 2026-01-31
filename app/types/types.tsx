@@ -29,7 +29,8 @@ export type ShootingDay = {
 
 export type LocationGroup = {
   scenes: SceneRow[],
-  sceneCount: number
+  sceneCount: number,
+  hasDayScene: boolean
 };
 
 export type AddItemModalType = {

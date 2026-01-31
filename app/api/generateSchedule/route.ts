@@ -44,6 +44,7 @@ function scheduleScenes(scenes: SceneRow[], maxDayTimeHours: number) {
             if (locationScenes.length === 0) {
                 delete locationSceneMap[locationName];
             }
+
         }
 
         // Sort scenes within the day from DAY to EVENING
@@ -75,44 +76,88 @@ function getLocationsSortedBySceneCount(scenes: SceneRow[]) {
         if (!locationMap[locationName]) {
             locationMap[locationName] = {
                 scenes: [],
-                sceneCount: 0
+                sceneCount: 0,
+                hasDayScene: false
             };
         }
         
         locationMap[locationName].scenes.push(scene);
 
-        // Track scene count per location
-        if (locationMap[locationName].sceneCount) {
-            locationMap[locationName].sceneCount += 1;
-        } else {
-            locationMap[locationName].sceneCount = 1;
+        // increment scene count of that Location
+        locationMap[locationName].sceneCount = (locationMap[locationName].sceneCount || 0) + 1;
+
+        // set the hasDayScene flag for that Location true if a scene in that Location is a day Scene
+        if (scene.time_of_day == "DAY"){
+            locationMap[locationName].hasDayScene = true;
         }
+
     }
 
-    // Sort locations by scene count (most scenes first)
-    locationMap = Object.fromEntries(
-        Object.entries(locationMap)
-            .sort((locationA, locationB) => locationB[1].sceneCount - locationA[1].sceneCount)
-    );
+    // Object Entries
+    const entries = Object.entries(locationMap);
+
+    // Split based on has day scenes or not
+    const withDayScene = entries.filter(([, value]) => value.hasDayScene);
+    const withoutDayScene = entries.filter(([, value]) => !value.hasDayScene);
+
+    // Sort each group by sceneCount
+    withDayScene.sort((a, b) => b[1].sceneCount - a[1].sceneCount);
+    withoutDayScene.sort((a, b) => b[1].sceneCount - a[1].sceneCount);
+
+    // Concatenate
+    locationMap = Object.fromEntries([
+    ...withDayScene,
+    ...withoutDayScene
+    ])
 
     return locationMap;
+
 }
 
 // Sort scenes within a location by sub-location (most scenes first)
 function sortSubLocationsBySceneCount(locationScenes: SceneRow[]) {
-    let subLocationSceneCount: Record<string, number> = {};
+    let subLocationSceneCount: Record<string, {sceneCount: number, hasDayScene: boolean}> = {};
     const sortedScenes = [];
 
     // Count scenes per sub-location
     locationScenes.forEach(scene => {
+
         const subLocationName = scene.sub_location_name;
-        subLocationSceneCount[subLocationName] = (subLocationSceneCount[subLocationName] || 0) + 1;
+        if (!subLocationSceneCount[subLocationName]) {
+            subLocationSceneCount[subLocationName] = {
+                sceneCount: 0,
+                hasDayScene: false
+            };
+        }
+
+        // increment scene count of that subLocation
+        subLocationSceneCount[subLocationName].sceneCount = (subLocationSceneCount[subLocationName].sceneCount || 0) + 1;
+        
+        // set the hasDayScene flag for that subLocation true if a scene in that subLocation is a day Scene
+        if (scene.time_of_day == "DAY"){
+            subLocationSceneCount[subLocationName].hasDayScene = true;
+        }    
+    
     });
 
-    // Sort sub-locations by scene count (most scenes first)
-    subLocationSceneCount = Object.fromEntries(
-        Object.entries(subLocationSceneCount).sort((a, b) => b[1] - a[1])
-    );
+
+    // Object Entries
+    const entries = Object.entries(subLocationSceneCount);
+
+    // Split based on has day scenes or not
+    const withDayScene = entries.filter(([, value]) => value.hasDayScene);
+    const withoutDayScene = entries.filter(([, value]) => !value.hasDayScene);
+
+    // Sort each group by sceneCount
+    withDayScene.sort((a, b) => b[1].sceneCount - a[1].sceneCount);
+    withoutDayScene.sort((a, b) => b[1].sceneCount - a[1].sceneCount);
+
+    // Concatenate
+    subLocationSceneCount = Object.fromEntries([
+    ...withDayScene,
+    ...withoutDayScene
+    ])
+
 
     // Process each sub-location in order
     for (const subLocationName in subLocationSceneCount) {
@@ -164,7 +209,6 @@ function sortScenesByLocationType(scenes: SceneRow[]) {
     
     return sortedScenes;
 }
-
 
 
 export async function POST(req: Request) {
