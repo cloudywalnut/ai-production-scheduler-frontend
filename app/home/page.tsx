@@ -10,6 +10,7 @@ import EditableTable from "./table";
 import AddItemModal from "./addItemModal";
 import ScheduleView from "./schedule";
 import { ArrowLeftEndOnRectangleIcon   } from "@heroicons/react/24/outline";
+import * as XLSX from "xlsx";
 
 
 export default function Home() {
@@ -227,6 +228,26 @@ export default function Home() {
     return data.scheduled_script;
   }
 
+  const exportExcel = (data: SceneRow[]) => {
+    const export_data = data.map(s => ({
+      scene_number: s.scene_number,
+      estimatedTime: s.estimatedTime,
+      location_type: s.location_type,
+      time_of_day: s.time_of_day,
+      location_name: s.location_name,
+      sub_location_name: s.location_name,
+      scene_summary: s.scene_summary,
+      characters: s.characters?.join(','),
+      extras: s.extras?.join(','),
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(export_data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Data");
+
+    XLSX.writeFile(wb, "data.xlsx");
+  };
+
 
   return (
 
@@ -348,6 +369,13 @@ export default function Home() {
               }}
               >
               {scheduleView ? "Back To Script Editor" : "View Schedule"}
+              </button>
+            )}
+
+            {scenesData && !scheduleView && (
+              <button className="bg-gray-500 hover:bg-gray-600 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
+              onClick={ () => { exportExcel(scenesData) }}>
+              Download Breakdown
               </button>
             )}
 
