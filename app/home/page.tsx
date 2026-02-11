@@ -4,7 +4,11 @@ import HomeClient from "./HomeClient";
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>Loading Home...</div>}>
+    <Suspense fallback={
+      <div className="flex justify-center items-center h-screen">
+        Loading Home...
+      </div>
+    }>
       <HomeClient />
     </Suspense>
   );
