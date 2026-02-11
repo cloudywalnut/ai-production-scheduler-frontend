@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { useRouter } from 'next/navigation'; // App Router
+import { useRouter, useSearchParams } from 'next/navigation'; // App Router
 import { supabase } from '../utils/supabase'
 import { User } from '@supabase/supabase-js';
 import Image from "next/image";
@@ -9,13 +9,13 @@ import { SceneRow, AddItemModalType, ShootingDay } from "../types/types";
 import EditableTable from "./table";
 import AddItemModal from "./addItemModal";
 import ScheduleView from "./schedule";
-import { ArrowLeftEndOnRectangleIcon   } from "@heroicons/react/24/outline";
+import { FolderOpenIcon, ArrowLeftEndOnRectangleIcon   } from "@heroicons/react/24/outline";
 import * as XLSX from "xlsx";
-
 
 export default function Home() {
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [scenesData, setScenesData] = useState<SceneRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [file, setFile] = useState<File | null>(null);
@@ -30,6 +30,7 @@ export default function Home() {
   const [currentScriptId, setCurrentScriptId] = useState<number | null>(null);
   const [schedule, setSchedule] = useState<ShootingDay[]>([]);
   const [scheduleView, setScheduleView] =  useState(false);
+  const projectId = searchParams.get('projectId')
 
   // Gets the User Authentication stuff runs initially
   useEffect(() => {
@@ -37,12 +38,20 @@ export default function Home() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
         router.replace('/auth');
-      } else {
+      } else{
         setUser(user);
+        const {data, error} = await supabase
+          .from('Projects')
+          .select('uid')
+          .eq('id', projectId)
+          .single()  
+        if (error || data.uid != user.id){
+          router.replace('/projects');
+        }
       }
     }
     checkUser();
-  },[router])
+  },[router, projectId])
 
 
   // Runs only on refresh
@@ -52,15 +61,16 @@ export default function Home() {
       const {data, error} = await supabase
         .from('Scripts')
         .select('id, script_name')
-        .eq('uid', user?.id);
-     
+        .eq('uid', user?.id)
+        .eq('project_id', projectId)
+
         if (!error) {
           setSavedScripts(data)
         };
 
     }
     getScripts();
-  }, [user])
+  }, [user, projectId])
 
   // signing out the user
   async function signOut() {
@@ -68,7 +78,7 @@ export default function Home() {
     if (!error){
       console.log('Signed Out')
     }
-    router.replace('/');
+    router.replace('/auth');
   }
 
   // save new scripts and updated ones too
@@ -89,7 +99,8 @@ export default function Home() {
           {
             uid: user?.id,
             script: scenesData,
-            script_name: file?.name
+            script_name: file?.name,
+            project_id: projectId
           }
         ]).select('id, script_name').single();
     
@@ -115,6 +126,7 @@ export default function Home() {
     setScenesData([]);
     setCurrentScriptId(null);
     setLoading(true);
+    setFile(null);
     alert("Your Script has Been Deleted Successfully");  
   }
 
@@ -255,9 +267,14 @@ export default function Home() {
 
       <div className="flex justify-between">
         <h1 className="text-2xl font-semibold mb-4">AI Script Scheduler</h1>
-        <ArrowLeftEndOnRectangleIcon className="w-7 h-7 mb-1 text-red-500 cursor-pointer
-          hover:text-red-700 shrink-0" onClick={signOut}/>
+        <div className="flex gap-5">
+          <FolderOpenIcon className="w-7 h-7 mb-1 text-black cursor-pointer
+            shrink-0" onClick={() => {router.replace('/projects')}}/>
+          <ArrowLeftEndOnRectangleIcon className="w-7 h-7 mb-1 text-red-500 cursor-pointer
+            hover:text-red-700 shrink-0" onClick={signOut}/>
+        </div>
       </div>
+
 
       {/* Uploading The files  - Need a fix in here as the input is only take from a very small area */}
       <div className="relative text-center border-2 border-dashed border-gray-700 rounded-lg mb-3 p-6 cursor-pointer hover:border-blue-400 transition">
@@ -303,7 +320,7 @@ export default function Home() {
       {!file && loading && (
         <div className="flex flex-col justify-center items-center w-full m-auto">
           <Image
-            src="/director.png"
+            src="/lights.png"
             alt="Loading"
             width={360}
             height={360}

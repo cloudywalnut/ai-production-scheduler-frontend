@@ -39,3 +39,10 @@ export type AddItemModalType = {
   fieldName: keyof SceneRow;
   scene: number;
 };
+
+export type UserProjectsType ={
+  id: string,
+  name: string,
+  type: string,
+  description: string
+}

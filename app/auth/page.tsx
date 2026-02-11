@@ -31,7 +31,7 @@ export default function AuthPage() {
     setLoading(false)
 
     // If there is no error means successful signIn then go to dashboard
-    if (!error) router.replace("/home");
+    if (!error) router.replace("/projects");
 }
 
   const signUp = async (e: React.FormEvent) => {
