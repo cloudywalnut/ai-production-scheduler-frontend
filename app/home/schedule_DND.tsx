@@ -1,7 +1,7 @@
 "use client";
 
 import { ShootingDay, SceneRow } from "../types/types";
-import { DndContext, closestCenter, DragEndEvent, DragOverlay } from "@dnd-kit/core";
+import { DndContext, closestCenter, DragEndEvent, DragOverlay, useSensors, useSensor, TouchSensor } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { useState } from "react";
 
@@ -13,6 +13,14 @@ interface ScheduleProps {
 export default function ScheduleView({ schedule, setSchedule}: ScheduleProps) {
 
   const [activeScene, setActiveScene] = useState<SceneRow | null>(null);
+  
+  // The sensor to work fine with adjustments on mobile
+  const sensor = useSensors(useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 200,
+      tolerance: 5
+    }
+  }))
 
   // Add the shifting logic over here - sorting the day wise schedule
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -166,6 +174,7 @@ export default function ScheduleView({ schedule, setSchedule}: ScheduleProps) {
         {/* The main DndContext everything is inside of this */}
         <DndContext 
           collisionDetection={closestCenter} 
+          sensors={sensor}
           onDragStart={(e) => {
             console.log(e.active.data.current) // Can remove later
             setActiveScene(e.active.data.current as SceneRow)
