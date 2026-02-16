@@ -8,9 +8,11 @@ import Image from "next/image";
 import { SceneRow, AddItemModalType, ShootingDay } from "../types/types";
 import EditableTable from "./table";
 import AddItemModal from "./addItemModal";
-import ScheduleView from "./schedule";
+import ScheduleView from "./schedule_DND";
 import { FolderOpenIcon, ArrowLeftEndOnRectangleIcon   } from "@heroicons/react/24/outline";
 import * as XLSX from "xlsx";
+import Voice from "./voice";
+
 
 export default function HomeClient() {
 
@@ -396,6 +398,11 @@ export default function HomeClient() {
               </button>
             )}
 
+            {/* Aiming to Use this for the purpose of director and agent conversation */}
+            {scheduleView && (
+              <Voice/>
+            )}
+
           </div>
         </>
       )}
@@ -424,6 +431,7 @@ export default function HomeClient() {
           {scheduleView && (
             <ScheduleView
               schedule = {schedule}
+              setSchedule = {setSchedule}
             />
           )}
 

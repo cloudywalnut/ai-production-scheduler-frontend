@@ -188,33 +188,68 @@ export default function Project() {
       }
 
       {!addProject && !selectedProjectId && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-          {userProjects.map((project) => (
-            <div
-              key={project.id}
-              className="border rounded-2xl p-4 cursor-pointer hover:shadow-md transition"
-              onClick={() => openProject(Number(project.id))}
-            >
-              {/* Image Placeholder */}
-              <div className="h-36 w-full bg-gray-200 rounded-xl mb-4 flex items-center justify-center text-gray-400">
-                Image
+
+        <div>
+
+          {userProjects.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-10 gap-4">
+              <Image
+                src="/lights.png"
+                alt="No Projects"
+                width={360}
+                height={360}
+                priority
+                className="rounded-lg"
+              />
+              <div className="text-2xl font-bold text-center">
+                No Projects Yet <br/> Create a New One Now!
               </div>
-
-              {/* Project Info */}
-              <h2 className="text-lg font-semibold">
-                <b>Project Name: </b>{project.name}
-              </h2>
-
-              <p className="text-sm text-gray-500 mt-1">
-                <b>Project Name: </b>{project.type}
-              </p>
-
-              <p className="text-sm text-gray-600 mt-2 line-clamp-3">
-                <b>Project Description: </b>{project.description}
-              </p>
+              <button
+                className="text-xl bg-gray-500 text-white px-6 py-2 rounded-xl hover:bg-gray-600 transition"
+                onClick={() => setAddProject(true)}
+              >
+                Create Project
+              </button>
             </div>
-          ))}
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+            {userProjects.map((project) => (
+              <div
+                key={project.id}
+                className="border rounded-2xl p-4 cursor-pointer hover:shadow-md transition"
+                onClick={() => openProject(Number(project.id))}
+              >
+                {/* Image Placeholder */}
+                <div className="w-full bg-gray-200 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                  <Image
+                    src="/project.png"
+                    alt="No Projects"
+                    width={360}
+                    height={360}
+                    priority
+                    className="rounded-lg max-w-full h-auto object-contain"
+                  />
+                </div>
+
+                {/* Project Info */}
+                <h2 className="text-lg font-semibold">
+                  <b>Project Name: </b>{project.name}
+                </h2>
+
+                <p className="text-sm text-gray-500 mt-1">
+                  <b>Project Name: </b>{project.type}
+                </p>
+
+                <p className="text-sm text-gray-600 mt-2 line-clamp-3">
+                  <b>Project Description: </b>{project.description}
+                </p>
+              </div>
+            ))}
+          </div>
+
         </div>
+
       )}
 
       {selectedProjectId && (
@@ -223,9 +258,16 @@ export default function Project() {
               className="border rounded-2xl p-4 cursor-pointer hover:shadow-md transition"
               onClick={goToScripts}
             >
-              {/* Image Placeholder */}
-              <div className="h-36 w-full bg-gray-200 rounded-xl mb-4 flex items-center justify-center text-gray-400">
-                Image
+
+              <div className="w-full bg-gray-200 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/schedule.png"
+                  alt="No Projects"
+                  width={360}
+                  height={360}
+                  priority
+                  className="rounded-lg max-w-full h-auto object-contain"
+                />
               </div>
 
               {/* Project Info */}
