@@ -4,8 +4,17 @@
 // useRef is a react hook in which we can change its .current value and it doesnt trigger re render
 // this means that even if the value changes the changes wont be like visible in UI as there is no re render
 import { useState, useRef } from "react";
+import { MessagesType } from "../types/types";
 
-export default function Voice() {
+
+interface VoiceProps {
+  messages: MessagesType[];
+  setMessages: React.Dispatch<React.SetStateAction<MessagesType[]>>;
+}
+
+
+export default function Voice({setMessages}: VoiceProps) {
+
   const [recording, setRecording] = useState(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -22,12 +31,16 @@ export default function Voice() {
     };
 
     mediaRecorder.onstop = () => {
+
+      // Revoke the old URL if it exists
+      if (audioURL) {
+        URL.revokeObjectURL(audioURL);
+      }
+
       const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
       const url = URL.createObjectURL(blob);
 
-
-      // The audio data being parsed onto our API which will do the processing and give back the right function
-      // to run to allow us to take actions accordingly
+      // audio to text conversion API
       const formData = new FormData();
       formData.append('audio', blob, 'recording.webm');
 
@@ -37,11 +50,14 @@ export default function Voice() {
         body: formData
       })
       .then(res => res.json())
-      .then(data => console.log(data.filename))
+      .then(data => {
+        setMessages(prev => [...prev, { fromUser: true, text: data.text }]);
+        agentResponse(data.text)
+      })
       .catch(console.error);
       
-      console.log(url)
       setAudioURL(url);
+
     };
 
     mediaRecorder.start();
@@ -53,10 +69,50 @@ export default function Voice() {
     setRecording(false);
   };
 
+  // Set the Agent Behaviour over here
+  const agentResponse = (userMessage: string) => {
+    
+    fetch("/api/ai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userMessage }),
+    })
+    .then(res => res.json())
+    .then((data) => {
+
+    setMessages(prev => [...prev, { fromUser: false, text: data.aiMessage }]);
+    genVoiceOutput(data.aiMessage)
+
+    })
+    .catch(err => console.error(err));
+
+  }
+
+  // Generates the voice output, use either webSpeechAPI or OpenAI
+  const genVoiceOutput = (aiMessage: string) => {
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(aiMessage);
+      const voices = synth.getVoices();
+
+      utterance.voice = voices[1] || voices[0];
+      utterance.rate = 1.2;
+      utterance.pitch = 1.8;
+      utterance.lang = "en-US";
+      
+      synth.cancel();
+      synth.speak(utterance);
+  }
+
+  // Set which function the agent calls over here
+  const agentActionRouter = (functionName: string) => {
+
+  }
+
   return (
 
     <>
-
       <button
         onClick={recording ? stopRecording : startRecording}
         className={`rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer ${
@@ -66,12 +122,11 @@ export default function Voice() {
         {recording ? "Stop Recording" : "Start Recording"}
       </button>
 
-      {audioURL && (
+      {/* {audioURL && (
         <div className="mt-6">
           <audio autoPlay src={audioURL} />
         </div>
-      )}
-
+      )} */}
     </>
 
   );

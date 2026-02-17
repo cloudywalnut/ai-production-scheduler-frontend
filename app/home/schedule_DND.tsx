@@ -1,7 +1,7 @@
 "use client";
 
 import { ShootingDay, SceneRow } from "../types/types";
-import { DndContext, closestCenter, DragEndEvent, DragOverlay, useSensors, useSensor, TouchSensor } from "@dnd-kit/core";
+import { DndContext, closestCenter, DragEndEvent, DragOverlay, useSensors, useSensor, TouchSensor, PointerSensor } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { useState } from "react";
 
@@ -15,7 +15,14 @@ export default function ScheduleView({ schedule, setSchedule}: ScheduleProps) {
   const [activeScene, setActiveScene] = useState<SceneRow | null>(null);
   
   // The sensor to work fine with adjustments on mobile
-  const sensor = useSensors(useSensor(TouchSensor, {
+  const sensor = useSensors(
+    useSensor(PointerSensor, {
+    activationConstraint: {
+      delay: 0,
+      tolerance: 5,
+    },
+    }),
+    useSensor(TouchSensor, {
     activationConstraint: {
       delay: 200,
       tolerance: 5
@@ -69,7 +76,7 @@ export default function ScheduleView({ schedule, setSchedule}: ScheduleProps) {
                 const activeSceneIndex = day.scenes.findIndex(s => s.scene_number == activeSceneId);
                 const overSceneIndex = day.scenes.findIndex(s => s.scene_number == overSceneId);
                 day.scenes.splice(activeSceneIndex,1); // removes from prev index
-                day.scenes.splice(overSceneIndex+1, 0, activeScene!); // adds to new index
+                day.scenes.splice(overSceneIndex, 0, activeScene!); // adds to new index
             }
         })
     }

@@ -46,3 +46,8 @@ export type UserProjectsType ={
   type: string,
   description: string
 }
+
+export type MessagesType = { 
+  fromUser: boolean,
+  text: string 
+}

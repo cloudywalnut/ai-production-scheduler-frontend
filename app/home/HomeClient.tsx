@@ -12,7 +12,8 @@ import ScheduleView from "./schedule_DND";
 import { FolderOpenIcon, ArrowLeftEndOnRectangleIcon   } from "@heroicons/react/24/outline";
 import * as XLSX from "xlsx";
 import Voice from "./voice";
-
+import Bot from "./bot";
+import { MessagesType } from "../types/types";
 
 export default function HomeClient() {
 
@@ -32,6 +33,8 @@ export default function HomeClient() {
   const [currentScriptId, setCurrentScriptId] = useState<number | null>(null);
   const [schedule, setSchedule] = useState<ShootingDay[]>([]);
   const [scheduleView, setScheduleView] =  useState(false);
+  const [botBox, setBotBox] = useState(false);
+  const [messages, setMessages] = useState<MessagesType[]>([]);
   const projectId = searchParams.get('projectId')
 
   // Gets the User Authentication stuff runs initially
@@ -400,7 +403,7 @@ export default function HomeClient() {
 
             {/* Aiming to Use this for the purpose of director and agent conversation */}
             {scheduleView && (
-              <Voice/>
+              <Voice messages={messages} setMessages={setMessages}/>
             )}
 
           </div>
@@ -433,6 +436,22 @@ export default function HomeClient() {
               schedule = {schedule}
               setSchedule = {setSchedule}
             />
+          )}
+
+          {/* The chatbot to view conversations */}
+          {scheduleView && (
+            <>
+              <Image
+                src="/bot.png"
+                alt="Bot"
+                width={70}
+                height={70}
+                className="fixed bottom-6 right-6 object-cover rounded-full cursor-pointer shadow-lg hover:scale-110 transition-transform duration-300"
+                priority
+                onClick={() => {setBotBox(true)}}
+              />
+              <Bot botBox={botBox} setBotBox={setBotBox} messages={messages} setMessages={setMessages} />            
+            </>
           )}
 
         </>
