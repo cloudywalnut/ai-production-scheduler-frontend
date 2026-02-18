@@ -75,7 +75,7 @@ export default function Bot({ botBox, setBotBox, messages, setMessages }: BotPro
             priority
           />
           <div>
-            <p className="text-white font-semibold text-sm">Ramadan</p>
+            <p className="text-white font-semibold text-sm">Ramdan</p>
             <p className="text-blue-100 text-xs">Online</p>
           </div>
         </div>

@@ -121,6 +121,20 @@ export default function HomeClient() {
     alert("Congrats Your Script has Been Saved Successfully");  
   }
 
+  const updateSchedule = async () =>{
+    if (currentScriptId){
+      await supabase
+        .from('Scripts')
+        .update([
+          {
+            scheduled_script: schedule,
+          }
+        ])
+        .eq('id', currentScriptId);
+    }
+    alert("Congrats Your Schedule has Been Updated Successfully");  
+  }
+
   const deleteScript = async () =>{
     await supabase
       .from('Scripts')
@@ -401,6 +415,18 @@ export default function HomeClient() {
               </button>
             )}
 
+            {scheduleView && (
+              <button className="bg-green-500 hover:bg-green-600 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
+              onClick={updateSchedule}>
+                Update Schedule
+              </button>
+            )}
+
+            {/* Aiming to Use this for the purpose of director and agent conversation */}
+            {scheduleView && (
+              <Voice messages={messages} setMessages={setMessages}/>
+            )}
+
             {scenesData && (
               <button className="bg-gray-500 hover:bg-gray-600 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
               onClick={ () => { 
@@ -412,11 +438,6 @@ export default function HomeClient() {
               }}>
                 {scheduleView ? "Download Breakdown": "Download Schedule"}
               </button>
-            )}
-
-            {/* Aiming to Use this for the purpose of director and agent conversation */}
-            {scheduleView && (
-              <Voice messages={messages} setMessages={setMessages}/>
             )}
 
           </div>

@@ -119,7 +119,7 @@ export default function Voice({setMessages}: VoiceProps) {
           recording ? "bg-red-500 hover:bg-red-600" : "bg-blue-500 hover:bg-blue-600"
         }`}
       >
-        {recording ? "Stop Recording" : "Start Recording"}
+        {recording ? "Stop Talking" : "Talk to Agent"}
       </button>
 
       {/* {audioURL && (
