@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+@media print {
+  @page {
+    margin: 0; /* This removes the header (date/title) and footer (URL) */
+  }
+  body {
+    margin: 1cm; /* This adds a clean margin back to your content only */
+  }
+}

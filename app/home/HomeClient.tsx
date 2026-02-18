@@ -265,12 +265,15 @@ export default function HomeClient() {
     XLSX.writeFile(wb, "data.xlsx");
   };
 
+  const downloadSchedule = () => {
+    window.print();
+  }
 
-  return (
+  return (    
 
     <div className="p-6">
 
-      <div className="flex justify-between">
+      <div className="flex justify-between print:hidden">
         <h1 className="text-2xl font-semibold mb-4">AI Script Scheduler</h1>
         <div className="flex gap-5">
           <FolderOpenIcon className="w-7 h-7 mb-1 text-black cursor-pointer
@@ -281,27 +284,30 @@ export default function HomeClient() {
       </div>
 
 
-      {/* Uploading The files  - Need a fix in here as the input is only take from a very small area */}
-      <div className="relative text-center border-2 border-dashed border-gray-700 rounded-lg mb-3 p-6 cursor-pointer hover:border-blue-400 transition">
-        <input
-          type="file"
-          accept=".pdf"
-          className="absolute w-full h-full left-0 top-0 opacity-0 cursor-pointer"
-          onChange={handleFileChange}
-        />
-        {!file ? (
-          <p className="text-gray-500">Click or Drag your script here to Upload</p>
-        ) : (
-          <>
-            <p className="text-gray-700">{file.name}</p>
-            <p className="text-gray-700 underline">Choose Another File</p>
-          </>
-        )}
-      </div>
+      
+      {/* Upload Scripts */}
+      {user && !scheduleView && (
+        <div className="relative text-center border-2 border-dashed border-gray-700 rounded-lg mb-3 p-6 cursor-pointer hover:border-blue-400 transition">
+          <input
+            type="file"
+            accept=".pdf"
+            className="absolute w-full h-full left-0 top-0 opacity-0 cursor-pointer"
+            onChange={handleFileChange}
+          />
+          {!file ? (
+            <p className="text-gray-500">Click or Drag your script here to Upload</p>
+          ) : (
+            <>
+              <p className="text-gray-700">{file.name}</p>
+              <p className="text-gray-700 underline">Choose Another File</p>
+            </>
+          )}
+        </div>
+      )}
 
 
       {/* View Saved Scripts */}
-      {user && (
+      {user && !scheduleView && (
         <>
           <h2 className="font-semibold mb-2">Select a Saved Script</h2>
           <select
@@ -357,7 +363,8 @@ export default function HomeClient() {
       {/* Display the Generate Schedule Button */}
       {!loading && (
         <>
-          <div className="flex flex-wrap md:flex-nowrap gap-2">
+
+          <div className="flex flex-wrap md:flex-nowrap gap-2 print:hidden">
 
             {!scheduleView && (
               <button className="bg-green-400 hover:bg-green-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
@@ -394,10 +401,16 @@ export default function HomeClient() {
               </button>
             )}
 
-            {scenesData && !scheduleView && (
+            {scenesData && (
               <button className="bg-gray-500 hover:bg-gray-600 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
-              onClick={ () => { exportExcel(scenesData) }}>
-              Download Breakdown
+              onClick={ () => { 
+                if (scheduleView){
+                  downloadSchedule();
+                }else{
+                  exportExcel(scenesData);
+                }
+              }}>
+                {scheduleView ? "Download Breakdown": "Download Schedule"}
               </button>
             )}
 
@@ -440,7 +453,7 @@ export default function HomeClient() {
 
           {/* The chatbot to view conversations */}
           {scheduleView && (
-            <>
+            <div className="print:hidden">
               <Image
                 src="/bot.png"
                 alt="Bot"
@@ -451,7 +464,7 @@ export default function HomeClient() {
                 onClick={() => {setBotBox(true)}}
               />
               <Bot botBox={botBox} setBotBox={setBotBox} messages={messages} setMessages={setMessages} />            
-            </>
+            </div>
           )}
 
         </>

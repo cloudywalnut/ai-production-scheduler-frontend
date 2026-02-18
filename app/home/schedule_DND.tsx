@@ -175,8 +175,8 @@ export default function ScheduleView({ schedule, setSchedule}: ScheduleProps) {
 
   return (
 
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-100 p-6 rounded-2xl">
+      <div className="max-w-auto mx-auto space-y-6">
 
         {/* The main DndContext everything is inside of this */}
         <DndContext 
