@@ -261,15 +261,15 @@ export default function HomeClient() {
 
   const exportExcel = (data: SceneRow[]) => {
     const export_data = data.map(s => ({
-      scene_number: s.scene_number,
-      estimatedTime: s.estimatedTime,
-      location_type: s.location_type,
-      time_of_day: s.time_of_day,
-      location_name: s.location_name,
-      sub_location_name: s.location_name,
-      scene_summary: s.scene_summary,
-      characters: s.characters?.join(','),
-      extras: s.extras?.join(','),
+      'Scene Numner': s.scene_number,
+      'Estimated Time': s.estimatedTime,
+      'Location Type': s.location_type,
+      'Time Of Day': s.time_of_day,
+      'Location Name': s.location_name,
+      'Sub Location Name': s.location_name,
+      'Scene Summary': s.scene_summary,
+      'Characters': s.characters?.join(','),
+      'Extras': s.extras?.join(','),
     }))
 
     const ws = XLSX.utils.json_to_sheet(export_data);
@@ -436,7 +436,7 @@ export default function HomeClient() {
                   exportExcel(scenesData);
                 }
               }}>
-                {scheduleView ? "Download Breakdown": "Download Schedule"}
+                {scheduleView ? "Download Schedule": "Download Breakdown"}
               </button>
             )}
 
