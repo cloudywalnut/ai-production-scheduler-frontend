@@ -11,33 +11,49 @@ interface EditableTableProps {
 
 export default function EditableTable({ scenesData, setScenesData, setAddItemModalConfig }: EditableTableProps){
     
+    // Add validation logic in here to not take more then one letter space or extra characters
+    const handleSceneNumChange = (idx: number, sceneNumber: string) => {
+      const regex = /^\d*[A-Za-z]?$/;
+      if (scenesData.some(s => s.scene_number == sceneNumber)){
+        alert("The scene number you are trying to key in already exists");
+        return;
+      }
+      if (sceneNumber.match(regex)){
+        const changedScenesData: SceneRow[] = [...scenesData];
+        changedScenesData[idx].scene_number = sceneNumber;
+        setScenesData(changedScenesData);
+      }
+    }
+
+  
     // When User Wants to Change Some Stuff
-    const handleChange = ( scene_number: number, field: keyof SceneRow, value: string) => {
-        setScenesData(prev =>
+    const handleChange = ( scene_number: string, field: keyof SceneRow, value: string) => {
+      setScenesData(prev =>
         prev.map(row => (row.scene_number === scene_number ? { ...row, [field]: value } : row))
-        );
+      );
     };
 
     // When characters or props need to change - Needs to Optimize
     const handleChangeArray = (
-        scene_number: number,
-        field: keyof SceneRow,
-        index: number,
-        value: string
+      scene_number: string,
+      field: keyof SceneRow,
+      index: number,
+      value: string
     ) => {      
-        setScenesData(prev =>
+      setScenesData(prev =>
         prev.map(row => {
-            if (row.scene_number !== scene_number) return row;
+          if (row.scene_number !== scene_number) return row;
 
-            const updatedArray = [...(row[field] as string[])];
-            updatedArray[index] = value;
+          const updatedArray = [...(row[field] as string[])];
+          updatedArray[index] = value;
 
-            return {
+          return {
             ...row,
             [field]: updatedArray
-            };
+          };
+
         })
-        );
+      );
     };
 
     /*
@@ -51,35 +67,48 @@ export default function EditableTable({ scenesData, setScenesData, setAddItemMod
         Same reference = no update. New reference = update!
     */
 
-    const removeItem = (scene_number: number, field: keyof SceneRow, value: string) => {
-        setScenesData(prev =>
+    const removeItem = (scene_number: string, field: keyof SceneRow, value: string) => {
+      setScenesData(prev =>
         prev.map(row => 
-            row.scene_number === scene_number 
-            ? { 
-                ...row, 
-                [field]: Array.isArray(row[field]) 
-                    ? row[field].filter((item: string) => item !== value)
-                    : row[field]
-                } 
-            : row
+          row.scene_number === scene_number 
+          ? { 
+              ...row, 
+              [field]: Array.isArray(row[field]) 
+                  ? row[field].filter((item: string) => item !== value)
+                  : row[field]
+              } 
+          : row
         )
-        );
+      );
     };
 
-    const deleteScene = (scene_to_remove: number) => {
-        setScenesData(prev  => prev.filter(scene => scene.scene_number != scene_to_remove))
+    const deleteScene = (scene_to_remove: string) => {
+      setScenesData(prev  => prev.filter(scene => scene.scene_number != scene_to_remove))
     }
 
+    // Add the scene re ordering logic now with letters introduced as well
     const orderScenes = () => {
-        setScenesData(prev =>
-            [...prev].sort((a, b) => a.scene_number - b.scene_number)
-        );
+      setScenesData(prev =>
+        [...prev].sort((a, b) => {
+          if (parseInt(a.scene_number) != parseInt(b.scene_number)) {
+            return parseInt(a.scene_number) - parseInt(b.scene_number);
+          } else {
+            const aStr = a.scene_number.toString();
+            const bStr = b.scene_number.toString();
+
+            const suffixA = aStr[aStr.length - 1];
+            const suffixB = bStr[bStr.length - 1];
+
+            return suffixA.charCodeAt(0) - suffixB.charCodeAt(0);
+          }
+        })
+      );
     };
 
     return (
         <>
     
-            <div className="overflow-x-auto rounded-lg border border-gray-300 bg-white shadow">
+          <div className="overflow-x-auto rounded-lg border border-gray-300 bg-white shadow">
             <table className="min-w-[1400px] table-fixed w-full border-collapse text-sm">
 
               <thead className="bg-gray-100">
@@ -132,10 +161,10 @@ export default function EditableTable({ scenesData, setScenesData, setAddItemMod
                     {/* Scene Number */}
                     <td className="px-3 py-2">
                       <input
-                        type="number"
+                        type="text"
                         value={row.scene_number}
                         onChange={e =>
-                          handleChange(row.scene_number, "scene_number", e.target.value)
+                          handleSceneNumChange(idx, e.target.value)
                         }
                         className="w-full border rounded px-2 py-1"
                       />

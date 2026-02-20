@@ -1,6 +1,6 @@
 export type SceneRow = {
   id: number;
-  scene_number: number;
+  scene_number: string;
   scene_heading: string;
   location_type: string;
   location_name: string;
@@ -37,7 +37,7 @@ export type AddItemModalType = {
   display: boolean;
   name: string;
   fieldName: keyof SceneRow;
-  scene: number;
+  scene: string;
 };
 
 export type UserProjectsType ={

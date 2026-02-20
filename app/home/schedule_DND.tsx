@@ -1,7 +1,7 @@
 "use client";
 
 import { ShootingDay, SceneRow } from "../types/types";
-import { DndContext, closestCenter, DragEndEvent, DragOverlay, useSensors, useSensor, TouchSensor, PointerSensor } from "@dnd-kit/core";
+import { DndContext, closestCenter, DragEndEvent, DragOverlay, useSensors, useSensor, TouchSensor, MouseSensor } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { useState } from "react";
 
@@ -16,10 +16,9 @@ export default function ScheduleView({ schedule, setSchedule}: ScheduleProps) {
   
   // The sensor to work fine with adjustments on mobile
   const sensor = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
     activationConstraint: {
-      delay: 0,
-      tolerance: 5,
+      distance: 5,
     },
     }),
     useSensor(TouchSensor, {
@@ -40,13 +39,13 @@ export default function ScheduleView({ schedule, setSchedule}: ScheduleProps) {
     let overSceneDay = -1
     
     daySceneMap.forEach((day,i) => {
-        if (day.includes(Number(activeSceneId))){
+        if (day.includes(activeSceneId as string)){
             activeSceneDay = i+1;
         }
     })
     
     daySceneMap.forEach((day,i) => {
-        if (day.includes(Number(overSceneId))){
+        if (day.includes(overSceneId as string)){
             overSceneDay = i+1;
         }
     })

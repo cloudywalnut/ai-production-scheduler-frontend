@@ -26,7 +26,7 @@ export default function HomeClient() {
     display: false,
     name: "",
     fieldName: "" as keyof SceneRow,
-    scene: 0
+    scene: ""
   });
   const [user, setUser] = useState<User | null>(null);
   const [savedScripts, setSavedScripts] = useState<{ id: string; script_name: string }[]>([]);  
@@ -175,7 +175,7 @@ export default function HomeClient() {
     setScenesData(prev => [
       {
         id: Date.now(),                // unique key
-        scene_number: prev.length + 1, // auto increment
+        scene_number: "", // auto increment
         scene_heading: "",
         location_type: "",          // default
         location_name: "",
