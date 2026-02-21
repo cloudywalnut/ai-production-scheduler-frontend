@@ -24,7 +24,7 @@ export default function AddItemModal({ setScenesData, addItemModalConfig, setAdd
         Same reference = no update. New reference = update!
     */
 
-    const addItem = (scene_number: number, field: keyof SceneRow, value: string) => {
+    const addItem = (scene_number: string, field: keyof SceneRow, value: string) => {
         setScenesData(prev =>
         prev.map(row => 
             row.scene_number === scene_number 
