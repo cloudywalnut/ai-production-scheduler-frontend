@@ -100,7 +100,7 @@ export default function Project() {
       
       {/* Navigation */}
       <div className="flex justify-between items-center print:hidden mb-4">
-        <h1 className="text-2xl font-semibold">AI Script Scheduler</h1>
+        <h1 className="text-xl md:text-2xl font-semibold">Script Breakdown & Scheduler</h1>
 
         <div className="flex gap-6 items-center">
 
