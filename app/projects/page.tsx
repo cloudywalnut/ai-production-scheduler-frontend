@@ -98,15 +98,35 @@ export default function Project() {
   return (
     <div className="p-6">
       
-      <div className="flex justify-between">
-        <h1 className="text-2xl font-semibold mb-4">AI Script Scheduler</h1>
-        <div className="flex gap-5">
-          <FolderOpenIcon className="w-7 h-7 mb-1 text-black cursor-pointer
-            shrink-0" onClick={viewProjects}/>
-          <ArrowLeftEndOnRectangleIcon className="w-7 h-7 mb-1 text-red-500 cursor-pointer
-            hover:text-red-700 shrink-0" onClick={signOut}/>
+      {/* Navigation */}
+      <div className="flex justify-between items-center print:hidden mb-4">
+        <h1 className="text-2xl font-semibold">AI Script Scheduler</h1>
+
+        <div className="flex gap-6 items-center">
+
+          {/* Projects */}
+          <div className="flex flex-col items-center cursor-pointer"
+              onClick={viewProjects}>
+            <FolderOpenIcon className="w-7 h-7 text-black" />
+            <span className="hidden lg:block text-sm mt-1">
+              Projects
+            </span>
+          </div>
+
+          {/* Logout */}
+          <div className="flex flex-col items-center cursor-pointer"
+              onClick={signOut}>
+            <ArrowLeftEndOnRectangleIcon
+              className="w-7 h-7 text-red-500 hover:text-red-700"
+            />
+            <span className="hidden lg:block text-sm mt-1">
+              Logout
+            </span>
+          </div>
+
         </div>
       </div>
+
             
       {/* When no Projects Exists UI or when user wants to add a new project*/}
       {(addProject) && 

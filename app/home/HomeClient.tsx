@@ -35,7 +35,7 @@ export default function HomeClient() {
   const [scheduleView, setScheduleView] =  useState(false);
   const [botBox, setBotBox] = useState(false);
   const [messages, setMessages] = useState<MessagesType[]>([]);
-  const projectId = searchParams.get('projectId')
+  const projectId = searchParams.get('projectId');
 
   // Gets the User Authentication stuff runs initially
   useEffect(() => {
@@ -158,7 +158,6 @@ export default function HomeClient() {
       .single();
 
     if (!error) {
-      setScheduleView(false)
       
       setCurrentScriptId(script_id);
       setScenesData(data.script);
@@ -174,13 +173,13 @@ export default function HomeClient() {
   const addScene = () => {
     setScenesData(prev => [
       {
-        id: Date.now(),                // unique key
-        scene_number: "", // auto increment
+        id: Date.now(),     // unique key
+        scene_number: "",             
         scene_heading: "",
-        location_type: "",          // default
+        location_type: "",
         location_name: "",
         sub_location_name: "",
-        time_of_day: "",            // default
+        time_of_day: "",
         characters: [],
         props: [],
         wardrobe: [],
@@ -219,7 +218,6 @@ export default function HomeClient() {
       setScenesData(data.scenesData);
       setLoading(false);
       setCurrentScriptId(null); // Set to null here again in case someone opened an existing script during loading
-      setScheduleView(false);
       setSchedule([]);
     })
     .catch(err => console.error(err));
@@ -287,17 +285,35 @@ export default function HomeClient() {
 
     <div className="p-6">
 
-      <div className="flex justify-between print:hidden">
-        <h1 className="text-2xl font-semibold mb-4">AI Script Scheduler</h1>
-        <div className="flex gap-5">
-          <FolderOpenIcon className="w-7 h-7 mb-1 text-black cursor-pointer
-            shrink-0" onClick={() => {router.replace('/projects')}}/>
-          <ArrowLeftEndOnRectangleIcon className="w-7 h-7 mb-1 text-red-500 cursor-pointer
-            hover:text-red-700 shrink-0" onClick={signOut}/>
+      {/* Navigation */}
+      <div className="flex justify-between items-center print:hidden mb-4">
+
+        <h1 className="text-2xl font-semibold">AI Script Scheduler</h1>
+
+        <div className="flex gap-6 items-center">
+
+          {/* Projects */}
+          <div className="flex flex-col items-center cursor-pointer"
+              onClick={() => router.replace('/projects')}>
+            <FolderOpenIcon className="w-7 h-7 text-black" />
+            <span className="hidden lg:block text-sm mt-1">
+              Projects
+            </span>
+          </div>
+
+          {/* Logout */}
+          <div className="flex flex-col items-center cursor-pointer"
+              onClick={signOut}>
+            <ArrowLeftEndOnRectangleIcon
+              className="w-7 h-7 text-red-500 hover:text-red-700"
+            />
+            <span className="hidden lg:block text-sm mt-1">
+              Logout
+            </span>
+          </div>
+
         </div>
       </div>
-
-
       
       {/* Upload Scripts */}
       {user && !scheduleView && (
@@ -424,7 +440,7 @@ export default function HomeClient() {
 
             {/* Aiming to Use this for the purpose of director and agent conversation */}
             {scheduleView && (
-              <Voice messages={messages} setMessages={setMessages}/>
+              <Voice messages={messages} setMessages={setMessages} schedule={schedule} setSchedule={setSchedule}/>
             )}
 
             {scenesData && (
@@ -484,7 +500,9 @@ export default function HomeClient() {
                 priority
                 onClick={() => {setBotBox(true)}}
               />
-              <Bot botBox={botBox} setBotBox={setBotBox} messages={messages} setMessages={setMessages} />            
+              <Bot botBox={botBox} setBotBox={setBotBox} messages={messages} 
+                  setMessages={setMessages} schedule={schedule} setSchedule={setSchedule} 
+              />            
             </div>
           )}
 

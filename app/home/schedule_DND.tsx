@@ -141,7 +141,8 @@ export default function ScheduleView({ schedule, setSchedule}: ScheduleProps) {
         {...listeners}   // handle pointer events
         {...attributes}  // ARIA & accessibility
         style={style}
-        className="bg-gray-50 border-l-4 border-indigo-500 rounded-lg p-4 "
+        className={`bg-gray-50 border-l-4 
+                  ${scene.time_of_day == "DAY" ? "border-orange-500" : "border-indigo-500"} rounded-lg p-4`}
       >
         <SceneCardContent scene={scene}/>
       </div>
@@ -194,7 +195,8 @@ export default function ScheduleView({ schedule, setSchedule}: ScheduleProps) {
 
           <DragOverlay>
             {activeScene ? (
-              <div className="bg-gray-50 border-l-4 border-indigo-500 rounded-lg p-4">
+              <div className={`bg-gray-50 border-l-4 
+                              ${activeScene.time_of_day == "DAY" ? "border-orange-500" : "border-indigo-500"} rounded-lg p-4`}>
                 <SceneCardContent scene={activeScene}/>
               </div>
             ) : null}

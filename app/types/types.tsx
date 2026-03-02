@@ -51,3 +51,12 @@ export type MessagesType = {
   fromUser: boolean,
   text: string 
 }
+
+export type AIResponseType = {
+  response: string,
+  swap_type: string,
+  day_from: string,
+  day_to: string,
+  scene_active: string,
+  scene_over: string
+}

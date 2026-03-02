@@ -2,16 +2,18 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react"; // Understand useEffect, useRef and understand where and why it is used
-import { MessagesType } from "../types/types";
+import { MessagesType, ShootingDay } from "../types/types";
 
 type BotProps = {
   botBox: boolean;
   setBotBox: React.Dispatch<React.SetStateAction<boolean>>;
   messages: MessagesType[];
   setMessages: React.Dispatch<React.SetStateAction<MessagesType[]>>;
+  schedule: ShootingDay[]
+  setSchedule: React.Dispatch<React.SetStateAction<ShootingDay[]>>;
 };
 
-export default function Bot({ botBox, setBotBox, messages, setMessages }: BotProps) {
+export default function Bot({ botBox, setBotBox, messages, setMessages, schedule }: BotProps) {
   
   // Allows to get an Element Reference which we can use - React DOM related
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -43,13 +45,15 @@ export default function Bot({ botBox, setBotBox, messages, setMessages }: BotPro
         },
         body: JSON.stringify({
           history: messages.slice(-5),
-          userMessage: userMessage, // whatever the user typed
+          userMessage, // whatever the user typed
+          schedule
         }),
       });      
       
       const result = await response.json();
+      const aiResponse = result.aiResponse;
 
-      setMessages(prev => [...prev, { fromUser: false, text: result.aiMessage }]);
+      setMessages(prev => [...prev, { fromUser: false, text: aiResponse.response }]);
 
       const element = document.getElementById("messageDisplay") as HTMLDivElement;
       element.scrollTop = element.scrollHeight;
