@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '../utils/supabase'
-import { useRouter } from 'next/navigation'; // App Router
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function AuthPage() {
@@ -21,118 +21,156 @@ export default function AuthPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
-
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) setError(error.message)
     setLoading(false)
-
-    // If there is no error means successful signIn then go to dashboard
     if (!error) router.replace("/projects");
-}
+  }
 
   const signUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password
-    })
-
+    const { error } = await supabase.auth.signUp({ email, password })
     if (error) setError(error.message)
     setLoading(false)
     setSignUpFlag(false)
   }
 
-
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="min-h-screen flex">
 
-      {/* Image on top */}
-      <Image
-        src="/layar.png"
-        width={240}
-        height={240}
-        alt="Logo"
-        className="mb-4"
-        priority
-      />
+      {/* Left Panel */}
+      <div className="hidden md:flex w-1/2 bg-[#1a0a0a] flex-col justify-between p-12">
+        
+        {/* Logo */}
+        <Image src="/layar.png" width={180} height={180} alt="Logo" priority className="rounded-lg" />
 
-      <div className="bg-white w-[360px] p-6 rounded-2xl shadow-lg">
+        {/* Middle Content */}
+        <div>
+          <h1 className="text-4xl font-bold text-white leading-tight mb-6">
+            Your complete<br />
+            <span className="text-[#9b1c1c]">film production</span><br />
+            command center.
+          </h1>
 
-        <h1 className="text-2xl font-semibold text-center mb-6">
-          {signUpFlag ? "Sign Up" : "Sign In "}
-        </h1>
+          <div className="space-y-5">
+            {[
+              { title: "Script Breakdown", desc: "Automatically tag and categorize every element in your script." },
+              { title: "Production Scheduling", desc: "Build shoot schedules that adapt to your cast and locations." },
+              { title: "Team Collaboration", desc: "Keep your entire crew aligned from pre-production to wrap." },
+            ].map((feature) => (
+              <div key={feature.title} className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#9b1c1c] mt-2 shrink-0" />
+                <div>
+                  <p className="text-white text-sm font-semibold">{feature.title}</p>
+                  <p className="text-gray-400 text-sm">{feature.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <form onSubmit={signUpFlag ? signUp : signIn} className="space-y-4">
+        {/* Bottom Quote */}
+        <p className="text-gray-600 text-xs">
+          Trusted by independent filmmakers and production houses worldwide.
+        </p>
 
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
+      </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
+      {/* Right Panel */}
+      <div className="flex-1 flex flex-col items-center justify-center bg-white px-8 py-12">
 
-          {signUpFlag && (
-            <>
+        {/* Mobile Logo */}
+        <div className="flex md:hidden items-center mb-3">
+          <Image src="/layar.png" width={180} height={180} alt="Logo" priority className="rounded-lg" />
+        </div>
 
-              <input
-                type="text"
-                placeholder="Name"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-              />
+        <div className="w-full max-w-sm">
 
-              <input
-                type="text"
-                placeholder="Organization"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                value={organization}
-                onChange={e => setOrginization(e.target.value)}
-                required
-              />
-
-            </>
-          )}
-
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50 cursor-pointer"
-          >
-            {signUpFlag ? loading ? 'Signing Up…' : 'Sign Up' : loading ? 'Signing in…' : 'Sign In'}
-          </button>
-
-          <p className="text-sm text-black-500 underline text-center cursor-pointer"
-          onClick={() => setSignUpFlag(!signUpFlag)}
-          >
-            {signUpFlag ? 'Sign In' : 'Sign Up Now'}
+          <h2 className="text-2xl font-bold text-gray-900 mb-1 text-center md:text-left">
+            {signUpFlag ? "Create your account" : "Welcome back"}
+          </h2>
+          <p className="text-sm text-gray-500 mb-8 text-center md:text-left">
+            {signUpFlag ? "Start managing your productions today." : "Sign in to continue to your dashboard."}
           </p>
 
-        </form>
+          <form onSubmit={signUpFlag ? signUp : signIn} className="space-y-4">
+
+            <div>
+              <label className="text-sm font-semibold text-gray-800 mb-1 block">Email</label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                className="w-full px-4 py-2.5 border border-gray-400 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black/20 transition"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold text-gray-800 mb-1 block">Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                className="w-full px-4 py-2.5 border border-gray-400 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black/20 transition"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {signUpFlag && (
+              <>
+                <div>
+                  <label className="text-sm font-semibold text-gray-800 mb-1 block">Name</label>
+                  <input
+                    type="text"
+                    placeholder="Your full name"
+                    className="w-full px-4 py-2.5 border border-gray-400 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black/20 transition"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-800 mb-1 block">Organization</label>
+                  <input
+                    type="text"
+                    placeholder="Your production company"
+                    className="w-full px-4 py-2.5 border border-gray-400 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black/20 transition"
+                    value={organization}
+                    onChange={e => setOrginization(e.target.value)}
+                    required
+                  />
+                </div>
+              </>
+            )}
+
+            {error && <p className="text-sm text-red-500">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-black text-white py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50 cursor-pointer mt-2"
+            >
+              {signUpFlag ? (loading ? 'Creating account…' : 'Create Account') : (loading ? 'Signing in…' : 'Sign In')}
+            </button>
+
+            <p className="text-sm text-center md:text-left text-gray-500 mt-2">
+              {signUpFlag ? 'Already have an account?' : "Don't have an account?"}{' '}
+              <span
+                className="text-[#9b1c1c] font-semibold cursor-pointer hover:underline"
+                onClick={() => setSignUpFlag(!signUpFlag)}
+              >
+                {signUpFlag ? 'Sign In' : 'Sign Up'}
+              </span>
+            </p>
+
+          </form>
+        </div>
       </div>
 
     </div>

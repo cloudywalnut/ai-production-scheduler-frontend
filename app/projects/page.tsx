@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'; // App Router
 import { useEffect, useState } from "react";
 import { User } from '@supabase/supabase-js';
 import { UserProjectsType } from "../types/types";
+import { ProjectHome } from "./projectHome";
+import { AllProjects } from "./allProjects";
 
 export default function Project() {
 
@@ -80,115 +82,102 @@ export default function Project() {
 
   }
 
-  function openProject(projectId: number){
-    setAddProject(false)
-    setSelectedProjectId(projectId);
-  }
 
   function viewProjects(){
     setAddProject(false)
     setSelectedProjectId(null);
   }
 
-  function goToScripts() {
-    // Use backticks to easily insert your variable into the string
-    router.push(`/home?projectId=${selectedProjectId}`);
-  }
 
   return (
-    <div className="p-6">
+    <div className="p-6 py-5">
       
       {/* Navigation */}
-      <div className="flex justify-between items-center print:hidden mb-4">
+      <div className="flex justify-between items-center print:hidden mb-6 border-b border-gray-100 pb-4">
+          <h1 className="hidden md:block text-xl font-bold tracking-tight text-gray-900">Script Breakdown & Scheduler</h1>
+          <h1 className="block md:hidden text-xl font-bold tracking-tight text-gray-900">SBSS.</h1>
 
-        <h1 className="hidden md:block text-2xl font-semibold">Script Breakdown & Scheduler</h1>
-        <h1 className="block md:hidden text-2xl font-semibold">SBSS.</h1>
-
-        <div className="flex gap-6 items-center">
-
-          {/* Projects */}
-          <div className="flex flex-col items-center cursor-pointer"
-              onClick={viewProjects}>
-            <FolderOpenIcon className="w-7 h-7 text-black" />
-            <span className="hidden lg:block text-sm mt-1">
-              Projects
-            </span>
+          <div className="flex gap-4 items-center">
+              <div className="flex items-center gap-1.5 cursor-pointer text-gray-500 hover:text-gray-800 transition" onClick={viewProjects}>
+                  <FolderOpenIcon className="w-5 h-5" />
+                  <span className="hidden lg:block text-sm font-medium">Projects</span>
+              </div>
+              <div className="flex items-center gap-1.5 cursor-pointer text-gray-400 hover:text-red-500 transition" onClick={signOut}>
+                  <ArrowLeftEndOnRectangleIcon className="w-5 h-5" />
+                  <span className="hidden lg:block text-sm font-medium">Logout</span>
+              </div>
           </div>
-
-          {/* Logout */}
-          <div className="flex flex-col items-center cursor-pointer"
-              onClick={signOut}>
-            <ArrowLeftEndOnRectangleIcon
-              className="w-7 h-7 text-red-500 hover:text-red-700"
-            />
-            <span className="hidden lg:block text-sm mt-1">
-              Logout
-            </span>
-          </div>
-
-        </div>
       </div>
-
             
-      {/* When no Projects Exists UI or when user wants to add a new project*/}
+      {/* Add New Projects*/}
       {(addProject) && 
-        <div className="grid grid-cols-5 gap-6 min-h-[400px]">
-          
-          {/* Left: Image */}
-          <div className="col-span-5 md:col-span-3 p-10 flex flex-col items-center justify-center bg-amber-50 rounded-2xl order-2 md:order-1">
-            <Image
-              src="/lights.png"
-              alt="Loading"
-              width={360}
-              height={360}
-              priority
-            />
-            <h1 className="text-2xl md:text-4xl font-bold p-2 text-center">Create a New Project</h1>
-            <h3 className="text-1xl md:text-2xl font-medium text-center">Create a New Project to Plan and Manage your Film</h3>
+          <div className="grid grid-cols-5 gap-6 min-h-[400px]">
+              
+              {/* Left: Image */}
+              <div className="col-span-5 md:col-span-3 p-10 flex flex-col items-center justify-center bg-gray-50 rounded-2xl order-2 md:order-1 border border-gray-200">
+                  <Image
+                      src="/lights.png"
+                      alt="Loading"
+                      width={300}
+                      height={300}
+                      priority
+                      className="opacity-90"
+                  />
+                  <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mt-4">Create a New Project</h1>
+                  <p className="text-sm md:text-base text-gray-600 text-center mt-2 max-w-sm">Plan, schedule and manage your film production all in one place.</p>
+              </div>
+
+              {/* Right: Form */}
+              <div className="col-span-5 md:col-span-2 flex items-start justify-center order-1 md:order-2">
+                  <form
+                      className="w-full space-y-5"
+                      onSubmit={(e) => {
+                          e.preventDefault();
+                          createProject(projectName, type, description);
+                      }}
+                  >
+                      <div>
+                          <label className="text-sm font-semibold text-gray-800 mb-1 block">Project Name</label>
+                          <input
+                              type="text"
+                              placeholder="e.g. The Last Scene"
+                              className="w-full border border-gray-400 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black/20 transition"
+                              onChange={e => setProjectName(e.target.value)}
+                          />
+                      </div>
+
+                      <div>
+                          <label className="text-sm font-semibold text-gray-800 mb-1 block">Type</label>
+                          <select
+                              className="w-full border border-gray-400 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-black/20 transition bg-white"
+                              onChange={e => setType(e.target.value)}
+                          >
+                              <option>Film</option>
+                              <option>Web Series</option>
+                              <option>Short Movie</option>
+                          </select>
+                      </div>
+
+                      <div>
+                          <label className="text-sm font-semibold text-gray-800 mb-1 block">Description</label>
+                          <textarea
+                              placeholder="Brief overview of your project..."
+                              className="w-full border border-gray-400 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black/20 transition resize-none"
+                              onChange={e => setDescription(e.target.value)}
+                              rows={4}
+                          />
+                      </div>
+
+                      <button
+                          type="submit"
+                          className="w-full bg-black text-white text-sm font-medium py-2.5 rounded-xl hover:bg-gray-800 transition cursor-pointer"
+                      >
+                          Create Project
+                      </button>
+                  </form>
+              </div>
+
           </div>
-
-          {/* Right: Form */}
-          <div className="col-span-5 md:col-span-2 flex items-start order-1 md:order-2">
-            <form className="w-full space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              createProject(projectName, type, description);
-            }}
-          >
-
-              <input
-                type="text"
-                placeholder="Project name"
-                className="w-full border rounded-md px-3 py-2"
-                onChange={e => setProjectName(e.target.value)}
-              />
-
-              <select className="w-full border rounded-md px-3 py-2"
-              onChange={e => setType(e.target.value)}>
-                  <option>Film</option>
-                  <option>Web Series</option>
-                  <option>Short Moview</option>
-              </select>
-
-              <textarea
-                placeholder="Description"
-                className="w-full border rounded-md px-3 py-2"
-                onChange={e => setDescription(e.target.value)}
-                rows={4}
-              />
-
-              <button
-                type="submit"
-                className="w-full bg-black text-white py-2 rounded-md hover:cursor-pointer"
-              >
-                Create
-              </button>
-
-            </form>
-          </div>
-
-        </div>
-      
       }
 
       {/* Floating Button to Add New Projects */}
@@ -209,98 +198,15 @@ export default function Project() {
         </button>      
       }
 
+      {/* View all Projects */}
       {!addProject && !selectedProjectId && (
-
-        <div>
-
-          {userProjects.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-10 gap-4">
-              <Image
-                src="/lights.png"
-                alt="No Projects"
-                width={360}
-                height={360}
-                priority
-                className="rounded-lg"
-              />
-              <div className="text-2xl font-bold text-center">
-                No Projects Yet <br/> Create a New One Now!
-              </div>
-              <button
-                className="text-xl bg-gray-500 text-white px-6 py-2 rounded-xl hover:bg-gray-600 transition"
-                onClick={() => setAddProject(true)}
-              >
-                Create Project
-              </button>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-            {userProjects.map((project) => (
-              <div
-                key={project.id}
-                className="border rounded-2xl p-4 cursor-pointer hover:shadow-md transition"
-                onClick={() => openProject(Number(project.id))}
-              >
-                {/* Image Placeholder */}
-                <div className="w-full bg-gray-200 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
-                  <Image
-                    src="/project.png"
-                    alt="No Projects"
-                    width={360}
-                    height={360}
-                    priority
-                    className="rounded-lg max-w-full h-auto object-contain"
-                  />
-                </div>
-
-                {/* Project Info */}
-                <h2 className="text-lg font-semibold">
-                  <b>Project Name: </b>{project.name}
-                </h2>
-
-                <p className="text-sm text-gray-500 mt-1">
-                  <b>Project Name: </b>{project.type}
-                </p>
-
-                <p className="text-sm text-gray-600 mt-2 line-clamp-3">
-                  <b>Project Description: </b>{project.description}
-                </p>
-              </div>
-            ))}
-          </div>
-
-        </div>
-
+        <AllProjects userProjects={userProjects} setUserProjects={setUserProjects} setAddProject={setAddProject} setSelectedProjectId={setSelectedProjectId}/>
       )}
 
+      {/* Project Home */}
       {selectedProjectId && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-            <div
-              className="border rounded-2xl p-4 cursor-pointer hover:shadow-md transition"
-              onClick={goToScripts}
-            >
-
-              <div className="w-full bg-gray-200 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
-                <Image
-                  src="/schedule.png"
-                  alt="No Projects"
-                  width={360}
-                  height={360}
-                  priority
-                  className="rounded-lg max-w-full h-auto object-contain"
-                />
-              </div>
-
-              {/* Project Info */}
-              <h2 className="text-lg font-semibold">
-                <b>Script Scheduler</b>
-              </h2>
-
-            </div>
-        </div>
+        <ProjectHome selectedProjectId={selectedProjectId}/>
       )}      
-
 
     </div>
   );

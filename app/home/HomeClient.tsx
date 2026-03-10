@@ -283,36 +283,22 @@ export default function HomeClient() {
 
   return (    
 
-    <div className="p-6">
+    <div className="p-6 py-5">
 
       {/* Navigation */}
-      <div className="flex justify-between items-center print:hidden mb-4">
+      <div className="flex justify-between items-center print:hidden mb-6 border-b border-gray-100 pb-4">
+        <h1 className="hidden md:block text-xl font-bold tracking-tight text-gray-900">Script Breakdown & Scheduler</h1>
+        <h1 className="block md:hidden text-xl font-bold tracking-tight text-gray-900">SBSS.</h1>
 
-        <h1 className="hidden md:block text-2xl font-semibold">Script Breakdown & Scheduler</h1>
-        <h1 className="block md:hidden text-2xl font-semibold">SBSS.</h1>
-
-        <div className="flex gap-6 items-center">
-
-          {/* Projects */}
-          <div className="flex flex-col items-center cursor-pointer"
-              onClick={() => router.replace('/projects')}>
-            <FolderOpenIcon className="w-7 h-7 text-black" />
-            <span className="hidden lg:block text-sm mt-1">
-              Projects
-            </span>
-          </div>
-
-          {/* Logout */}
-          <div className="flex flex-col items-center cursor-pointer"
-              onClick={signOut}>
-            <ArrowLeftEndOnRectangleIcon
-              className="w-7 h-7 text-red-500 hover:text-red-700"
-            />
-            <span className="hidden lg:block text-sm mt-1">
-              Logout
-            </span>
-          </div>
-
+        <div className="flex gap-4 items-center">
+            <div className="flex items-center gap-1.5 cursor-pointer text-gray-500 hover:text-gray-800 transition" onClick={() => router.replace('/projects')}>
+                <FolderOpenIcon className="w-5 h-5" />
+                <span className="hidden lg:block text-sm font-medium">Projects</span>
+            </div>
+            <div className="flex items-center gap-1.5 cursor-pointer text-gray-400 hover:text-red-500 transition" onClick={signOut}>
+                <ArrowLeftEndOnRectangleIcon className="w-5 h-5" />
+                <span className="hidden lg:block text-sm font-medium">Logout</span>
+            </div>
         </div>
       </div>
       
