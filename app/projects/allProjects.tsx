@@ -64,7 +64,7 @@ export function AllProjects({userProjects, setUserProjects, setAddProject, setSe
                         <p className="text-sm text-gray-600 mt-1">Create a new one to get started.</p>
                     </div>
                     <button
-                        className="bg-black text-white text-sm px-6 py-2.5 rounded-xl hover:bg-gray-800 transition"
+                        className="bg-black text-white cursor-pointer text-sm px-6 py-2.5 rounded-xl hover:bg-gray-800 transition"
                         onClick={() => setAddProject(true)}
                     >
                         + Create Project

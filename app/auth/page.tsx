@@ -27,14 +27,30 @@ export default function AuthPage() {
     if (!error) router.replace("/projects");
   }
 
+  // For creating the user in the database - fix this tomorrow
+  // Passing dummy in the uid for now
+  async function createUser(userId: string){
+    await supabase
+    .from('Users')
+    .insert([
+      {
+        uid: userId,
+        name,
+        organization,
+      }
+    ]);
+  }
+
   const signUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) setError(error.message)
+    
+    const { data: {user}, error: signupError } = await supabase.auth.signUp({ email, password })
+    if (signupError) setError(signupError.message)
     setLoading(false)
     setSignUpFlag(false)
+    createUser(user!.id); // It will be available always if signup is successful
   }
 
   return (
@@ -82,7 +98,7 @@ export default function AuthPage() {
       <div className="flex-1 flex flex-col items-center justify-center bg-white px-8 py-12">
 
         {/* Mobile Logo */}
-        <div className="flex md:hidden items-center mb-3">
+        <div className="flex md:hidden items-center mb-5">
           <Image src="/layar.png" width={180} height={180} alt="Logo" priority className="rounded-lg" />
         </div>
 

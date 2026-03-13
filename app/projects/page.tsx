@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import { supabase } from '../utils/supabase'
-import { FolderOpenIcon, ArrowLeftEndOnRectangleIcon   } from "@heroicons/react/24/outline";
+import { FolderOpenIcon, ArrowLeftEndOnRectangleIcon, UserIcon } from "@heroicons/react/24/outline";
 import { useRouter } from 'next/navigation'; // App Router
 import { useEffect, useState } from "react";
 import { User } from '@supabase/supabase-js';
 import { UserProjectsType } from "../types/types";
 import { ProjectHome } from "./projectHome";
 import { AllProjects } from "./allProjects";
+
 
 export default function Project() {
 
@@ -101,6 +102,10 @@ export default function Project() {
               <div className="flex items-center gap-1.5 cursor-pointer text-gray-500 hover:text-gray-800 transition" onClick={viewProjects}>
                   <FolderOpenIcon className="w-5 h-5" />
                   <span className="hidden lg:block text-sm font-medium">Projects</span>
+              </div>
+              <div className="flex items-center gap-1.5 cursor-pointer text-gray-400 hover:text-green-500 transition" onClick={() => router.replace('/profile')}>
+                  <UserIcon className="w-5 h-5" />
+                  <span className="hidden lg:block text-sm font-medium">Profile</span>
               </div>
               <div className="flex items-center gap-1.5 cursor-pointer text-gray-400 hover:text-red-500 transition" onClick={signOut}>
                   <ArrowLeftEndOnRectangleIcon className="w-5 h-5" />

@@ -9,7 +9,7 @@ import { SceneRow, AddItemModalType, ShootingDay } from "../types/types";
 import EditableTable from "./table";
 import AddItemModal from "./addItemModal";
 import ScheduleView from "./schedule_DND";
-import { FolderOpenIcon, ArrowLeftEndOnRectangleIcon   } from "@heroicons/react/24/outline";
+import { FolderOpenIcon, ArrowLeftEndOnRectangleIcon, UserIcon} from "@heroicons/react/24/outline";
 import * as XLSX from "xlsx";
 import Voice from "./voice";
 import Bot from "./bot";
@@ -294,6 +294,10 @@ export default function HomeClient() {
             <div className="flex items-center gap-1.5 cursor-pointer text-gray-500 hover:text-gray-800 transition" onClick={() => router.replace('/projects')}>
                 <FolderOpenIcon className="w-5 h-5" />
                 <span className="hidden lg:block text-sm font-medium">Projects</span>
+            </div>
+            <div className="flex items-center gap-1.5 cursor-pointer text-gray-400 hover:text-green-500 transition" onClick={() => router.replace('/profile')}>
+                <UserIcon className="w-5 h-5" />
+                <span className="hidden lg:block text-sm font-medium">Profile</span>
             </div>
             <div className="flex items-center gap-1.5 cursor-pointer text-gray-400 hover:text-red-500 transition" onClick={signOut}>
                 <ArrowLeftEndOnRectangleIcon className="w-5 h-5" />
