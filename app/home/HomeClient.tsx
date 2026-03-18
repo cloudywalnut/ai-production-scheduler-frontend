@@ -408,7 +408,7 @@ export default function HomeClient() {
             {currentScriptId && !scheduleView && (
               <button className="bg-blue-400 hover:bg-blue-500 rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer"
               onClick={()=>{generateSchedule(currentScriptId)}}>
-              Genertae Schedule
+              Generate Schedule
               </button>
             )}
 
