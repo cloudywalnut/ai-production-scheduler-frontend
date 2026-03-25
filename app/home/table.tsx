@@ -109,7 +109,7 @@ export default function EditableTable({ scenesData, setScenesData, setAddItemMod
         <>
     
           <div className="overflow-x-auto rounded-lg border border-gray-300 bg-white shadow">
-            <table className="min-w-[1400px] table-fixed w-full border-collapse text-sm">
+            <table className="min-w-[1800px] table-fixed w-full border-collapse text-sm">
 
               <thead className="bg-gray-100">
                 <tr>
@@ -124,6 +124,8 @@ export default function EditableTable({ scenesData, setScenesData, setAddItemMod
                     { name: "Description", width: "w-30" },
                     { name: "Characters",  width: "w-30" },
                     { name: "BG Talent",  width: "w-30" },
+                    { name: "Prop",  width: "w-30" },
+                    { name: "Wardrobe",  width: "w-30" },
                   ].map((header,idx) => (
                     <th
                       key={idx}
@@ -309,6 +311,73 @@ export default function EditableTable({ scenesData, setScenesData, setAddItemMod
                             />
                             <MinusCircleIcon className="w-5 h-5 mb-1 text-red-500 cursor-pointer
                              hover:text-red-700 shrink-0" onClick={() => removeItem(row.scene_number, "extras", extra)}/>
+                          </div>
+                        )
+                      })}
+                    </td>
+
+
+                    {/* Displaying the Props */}
+                    <td className="px-3 py-2">
+
+                      {/* To add new Items */}
+                      <div key={idx} className="flex justify-between">
+                        <p className="mr-2">{""}</p>
+                        <PlusCircleIcon className="w-5 h-5 mb-1 text-blue-500 cursor-pointer hover:text-blue-700 shrink-0"
+                        onClick={() =>
+                          setAddItemModalConfig({
+                            display: true,
+                            name: "Prop",
+                            fieldName: "props",
+                            scene: row.scene_number
+                          })
+                        }>
+                        </PlusCircleIcon>
+                      </div>
+
+                      {row.props.map((prop,idx) => {
+                        return(
+                          <div key={idx} className="flex justify-between">
+                            <input type ="text" className="mr-2 min-w-0 border-b focus:outline-none" value={prop}
+                            onChange={e =>
+                              handleChangeArray(row.scene_number, "props", idx, e.target.value)
+                            }
+                            />
+                            <MinusCircleIcon className="w-5 h-5 mb-1 text-red-500 cursor-pointer
+                             hover:text-red-700 shrink-0" onClick={() => removeItem(row.scene_number, "props", prop)}/>
+                          </div>
+                        )
+                      })}
+                    </td>
+
+                    {/* Displaying the Wardrobe */}
+                    <td className="px-3 py-2">
+
+                      {/* To add new Items */}
+                      <div key={idx} className="flex justify-between">
+                        <p className="mr-2">{""}</p>
+                        <PlusCircleIcon className="w-5 h-5 mb-1 text-blue-500 cursor-pointer hover:text-blue-700 shrink-0"
+                        onClick={() =>
+                          setAddItemModalConfig({
+                            display: true,
+                            name: "Wardrobe",
+                            fieldName: "wardrobe",
+                            scene: row.scene_number
+                          })
+                        }>
+                        </PlusCircleIcon>
+                      </div>
+
+                      {row.wardrobe.map((item,idx) => {
+                        return(
+                          <div key={idx} className="flex justify-between">
+                            <input type ="text" className="mr-2 min-w-0 border-b focus:outline-none" value={item}
+                            onChange={e =>
+                              handleChangeArray(row.scene_number, "wardrobe", idx, e.target.value)
+                            }
+                            />
+                            <MinusCircleIcon className="w-5 h-5 mb-1 text-red-500 cursor-pointer
+                             hover:text-red-700 shrink-0" onClick={() => removeItem(row.scene_number, "wardrobe", item)}/>
                           </div>
                         )
                       })}
