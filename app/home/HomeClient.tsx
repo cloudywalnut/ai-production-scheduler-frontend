@@ -268,6 +268,8 @@ export default function HomeClient() {
       'Scene Summary': s.scene_summary,
       'Characters': s.characters?.join(','),
       'Extras': s.extras?.join(','),
+      'Props': s.props?.join(','),
+      'Wardrobe': s.wardrobe?.join(','),
     }))
 
     const ws = XLSX.utils.json_to_sheet(export_data);
