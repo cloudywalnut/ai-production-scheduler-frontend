@@ -24,7 +24,7 @@ export function ProjectHome({selectedProjectId}: ProjectHomeProps){
                 {/* Thumbnail */}
                 <div className="w-full h-48 bg-gray-100 overflow-hidden">
                     <Image
-                        src="/schedule.png"
+                        src="/ScheduleNew.png"
                         alt="Script Scheduler"
                         width={360}
                         height={192}

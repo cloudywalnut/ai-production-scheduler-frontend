@@ -289,8 +289,13 @@ export default function HomeClient() {
 
       {/* Navigation */}
       <div className="flex justify-between items-center print:hidden mb-6 border-b border-gray-100 pb-4">
-        <h1 className="hidden md:block text-xl font-bold tracking-tight text-gray-900">Script Breakdown & Scheduler</h1>
-        <h1 className="block md:hidden text-xl font-bold tracking-tight text-gray-900">SBSS.</h1>
+        <Image
+          src="/SBSSLogo.png"
+          alt="Loading"
+          width={180}
+          height={100}
+          priority
+        />
 
         <div className="flex gap-4 items-center">
             <div className="flex items-center gap-1.5 cursor-pointer text-gray-500 hover:text-gray-800 transition" onClick={() => router.replace('/projects')}>

@@ -86,8 +86,13 @@ export default function Project() {
       
       {/* Navigation */}
       <div className="flex shrink-0 justify-between items-center print:hidden border-b border-gray-100 p-6 pb-4">
-          <h1 className="hidden md:block text-xl font-bold tracking-tight text-gray-900">Script Breakdown & Scheduler</h1>
-          <h1 className="block md:hidden text-xl font-bold tracking-tight text-gray-900">SBSS.</h1>
+        <Image
+            src="/SBSSLogo.png"
+            alt="Loading"
+            width={180}
+            height={100}
+            priority
+        />    
 
           {/* Hamburger - mobile only */}
           <button className="md:hidden cursor-pointer" onClick={() => setDrawerOpen(true)}>

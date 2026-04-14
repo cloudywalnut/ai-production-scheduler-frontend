@@ -83,7 +83,7 @@ export function AllProjects({userProjects, setUserProjects, setAddProject, setSe
                         {/* Thumbnail */}
                         <div className="w-full h-36 bg-gray-100 overflow-hidden">
                             <Image
-                                src="/project.png"
+                                src="/ProjectNew.png"
                                 alt={project.name}
                                 width={360}
                                 height={144}
