@@ -138,7 +138,7 @@ export default function Project() {
 
           {/* Add New Projects */}
           {(addProject) && 
-              <div className="grid grid-cols-5 gap-6 min-h-[400px]">
+              <div className="grid grid-cols-5 gap-6 min-h-100">
                   
                   {/* Left: Image */}
                   <div className="col-span-5 md:col-span-3 p-10 flex flex-col items-center justify-center bg-gray-50 rounded-2xl order-2 md:order-1 border border-gray-200">
