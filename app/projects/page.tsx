@@ -85,19 +85,21 @@ export default function Project() {
     <div className="flex flex-col h-screen overflow-hidden">
       
       {/* Navigation */}
-      <div className="flex shrink-0 justify-between items-center print:hidden border-b border-gray-100 p-6 pb-4">
+      <div className="bg-black flex shrink-0 justify-between items-center print:hidden p-5 pb-3 border-b-3 border-gray-700">
+        
         <Image
-            src="/SBSSLogo.png"
-            alt="Loading"
-            width={180}
-            height={100}
-            priority
-        />    
+          src="/SBSSLight.png"
+          alt="Loading"
+          width={220}
+          height={160}
+          priority
+        />
 
-          {/* Hamburger - mobile only */}
-          <button className="md:hidden cursor-pointer" onClick={() => setDrawerOpen(true)}>
-            <Bars3Icon className="w-6 h-6" />
-          </button>
+        {/* Hamburger - mobile only */}
+        <button className="md:hidden cursor-pointer" onClick={() => setDrawerOpen(true)}>
+          <Bars3Icon className="w-6 h-6" />
+        </button>
+        
       </div>
 
       <div className="flex flex-1 overflow-hidden">
@@ -109,24 +111,33 @@ export default function Project() {
 
         {/* Side Panel */}
         <div className={`
-          fixed md:static top-0 left-0 h-full w-64 bg-gray-100 p-5 z-20
+          fixed md:static top-0 left-0 h-full w-64 bg-black p-5 z-20
           transition-transform duration-300
           ${drawerOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0
         `}>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Script Breakdown & Scheduler</h1>
-          <p className="text-sm md:text-base text-gray-600 mb-6">Manage your film projects, view details, and track progress all in one place.</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-100 mb-2">Script Breakdown & Scheduler</h1>
+          <p className="text-sm md:text-base text-gray-300 mb-6">Manage your film projects, view details, and track progress all in one place.</p>
 
           <div className="flex flex-col gap-4 items-start">
-              <div className="flex items-center gap-1.5 cursor-pointer text-gray-500 hover:text-gray-800 transition" onClick={viewProjects}>
+              <div
+                className="flex items-center gap-1.5 cursor-pointer w-full rounded hover:p-2 text-gray-200 bg-linear-to-r from-transparent to-transparent hover:from-red-900 hover:to-black hover:text-white transition-all duration-200"
+                onClick={viewProjects}
+              >
                   <FolderOpenIcon className="w-5 h-5" />
                   <span className="text-sm font-medium">All Projects</span>
               </div>
-              <div className="flex items-center gap-1.5 cursor-pointer text-gray-400 hover:text-green-500 transition" onClick={() => router.replace('/profile')}>
+              <div
+                className="flex items-center gap-1.5 cursor-pointer w-full rounded hover:p-2 text-gray-200 bg-linear-to-r from-transparent to-transparent hover:from-red-900 hover:to-black hover:text-white transition-all duration-200"
+                onClick={() => router.replace('/profile')}
+              >
                   <UserIcon className="w-5 h-5" />
                   <span className="text-sm font-medium">Profile</span>
               </div>
-              <div className="flex items-center gap-1.5 cursor-pointer text-gray-400 hover:text-red-500 transition" onClick={signOut}>
+              <div
+                className="flex items-center gap-1.5 cursor-pointer w-full rounded hover:p-2 text-gray-200 bg-linear-to-r from-transparent to-transparent hover:from-red-900 hover:to-black hover:text-white transition-all duration-200"
+                onClick={signOut}
+              >
                   <ArrowLeftEndOnRectangleIcon className="w-5 h-5" />
                   <span className="text-sm font-medium">Logout</span>
               </div>
