@@ -103,13 +103,14 @@ export default function EditableTable({ scenesData, setScenesData, setAddItemMod
           }
         })
       );
+      alert("The scenes have been sorted successfully")
     };
 
     return (
         <>
     
           <div className="overflow-x-auto rounded-lg border border-gray-300 bg-white shadow">
-            <table className="min-w-[1800px] table-fixed w-full border-collapse text-sm">
+            <table className="min-w-450 table-fixed w-full border-collapse text-sm">
 
               <thead className="bg-gray-100">
                 <tr>

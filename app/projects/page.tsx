@@ -88,16 +88,16 @@ export default function Project() {
       <div className="bg-black flex shrink-0 justify-between items-center print:hidden p-5 pb-3 border-b-3 border-gray-700">
         
         <Image
-          src="/SBSSLight.png"
+          src="/Script_Breakdown_DarkBG.png"
           alt="Loading"
-          width={220}
-          height={160}
+          width={180}
+          height={100}
           priority
         />
 
         {/* Hamburger - mobile only */}
         <button className="md:hidden cursor-pointer" onClick={() => setDrawerOpen(true)}>
-          <Bars3Icon className="w-6 h-6" />
+          <Bars3Icon className="w-6 h-6 text-white" />
         </button>
         
       </div>
