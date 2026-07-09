@@ -290,7 +290,7 @@ export default function HomeClient() {
       {/* Navigation */}
       <div className="flex justify-between items-center print:hidden mb-6 border-b border-gray-100 pb-4">
         <Image
-          src="/SBSSLogo.png"
+          src="/Script_Breakdown_LightBG.png"
           alt="Loading"
           width={180}
           height={100}
