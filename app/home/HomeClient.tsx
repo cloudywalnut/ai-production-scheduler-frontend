@@ -88,6 +88,10 @@ export default function HomeClient() {
 
   // save new scripts and updated ones too
   const saveScript = async () =>{
+    if (!scenesData || scenesData.length === 0){
+      alert("Nothing to save");
+      return;
+    }
     if (currentScriptId){
       await supabase
         .from('Scripts')
@@ -258,6 +262,10 @@ export default function HomeClient() {
   }
 
   const exportExcel = (data: SceneRow[]) => {
+    if (!data || data.length === 0){
+      alert("Nothing to export");
+      return;
+    }
     const export_data = data.map(s => ({
       'Scene Numner': s.scene_number,
       'Estimated Time': s.estimatedTime,

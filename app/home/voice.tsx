@@ -142,8 +142,9 @@ export default function Voice({messages, setMessages, schedule, setSchedule}: Vo
       const synth = window.speechSynthesis;
       const utterance = new SpeechSynthesisUtterance(aiMessage);
       const voices = synth.getVoices();
+      const englishVoice = voices.find(v => v.lang.toLowerCase().startsWith("en"));
 
-      utterance.voice = voices[1] || voices[0];
+      utterance.voice = englishVoice || voices[0];
       utterance.rate = 1.2;
       utterance.pitch = 1.8;
       utterance.lang = "en-US";

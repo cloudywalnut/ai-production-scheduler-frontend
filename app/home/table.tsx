@@ -27,7 +27,7 @@ export default function EditableTable({ scenesData, setScenesData, setAddItemMod
 
   
     // When User Wants to Change Some Stuff
-    const handleChange = ( scene_number: string, field: keyof SceneRow, value: string) => {
+    const handleChange = ( scene_number: string, field: keyof SceneRow, value: string | number) => {
       setScenesData(prev =>
         prev.map(row => (row.scene_number === scene_number ? { ...row, [field]: value } : row))
       );
@@ -178,9 +178,12 @@ export default function EditableTable({ scenesData, setScenesData, setAddItemMod
                       <input
                         type="number"
                         value={row.estimatedTime}
-                        onChange={e =>
-                          handleChange(row.scene_number, "estimatedTime", e.target.value)
-                        }
+                        onChange={e => {
+                          const raw = e.target.value;
+                          const value = raw === "" ? 0 : Number(raw);
+                          if (value < 0) return;
+                          handleChange(row.scene_number, "estimatedTime", value)
+                        }}
                         className="w-full border rounded px-2 py-1"
                       />
                     </td>
