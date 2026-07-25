@@ -43,9 +43,15 @@ export default function AuthPage() {
 
   const signUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
-    
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long')
+      return
+    }
+
+    setLoading(true)
+
     const { data: {user}, error: signupError } = await supabase.auth.signUp({ email, password })
     if (signupError) setError(signupError.message)
     setLoading(false)

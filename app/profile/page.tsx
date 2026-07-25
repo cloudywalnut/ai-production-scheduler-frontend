@@ -15,6 +15,7 @@ export default function Project() {
   const [organization, setOrginization] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [changePasswordFlag, setChangePasswordFlag] = useState<boolean>(false);
+  const [passwordError, setPasswordError] = useState<string>("");
 
   // Gets the User Authentication stuff runs initially
   useEffect(() => {
@@ -72,6 +73,12 @@ export default function Project() {
 
   // Function to change the Password
   async function changePassword(){
+    if (password.length < 8) {
+        setPasswordError("Password must be at least 8 characters long")
+        return
+    }
+    setPasswordError("")
+
     const { error } = await supabase.auth.updateUser({
         password: password
     })
@@ -81,7 +88,7 @@ export default function Project() {
         setPassword("");
     } else {
         console.error(error.message)
-    }    
+    }
   }
 
 
@@ -154,9 +161,10 @@ export default function Project() {
                     <input
                         type="password"
                         value={password}
-                        onChange={e => setPassword(e.target.value)}
+                        onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
                         className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
+                    {passwordError && <p className="text-sm text-red-500 mt-1">{passwordError}</p>}
                     </div>
                 </>
                 )}

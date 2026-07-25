@@ -213,7 +213,7 @@ export default function HomeClient() {
     const formData = new FormData();
     formData.append("script", selectedFile); // key must match server-side multer field
 
-    fetch("https://vodstr.up.railway.app/extract", {
+    fetch("http://localhost:5000/extract", {
       method: "POST",
       body: formData
     })
