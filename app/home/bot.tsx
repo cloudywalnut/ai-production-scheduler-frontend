@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react"; // Understand useEffect, useRef and understand where and why it is used
-import { MessagesType, ShootingDay } from "../types/types";
+import { AIResponseType, MessagesType, ShootingDay } from "../types/types";
+import { authFetch } from "../utils/authFetch";
+import { formatScheduleForAI } from "../utils/formatSchedule";
+import { applyAgentAction } from "../utils/applyAgentAction";
 
 type BotProps = {
   botBox: boolean;
@@ -13,7 +16,7 @@ type BotProps = {
   setSchedule: React.Dispatch<React.SetStateAction<ShootingDay[]>>;
 };
 
-export default function Bot({ botBox, setBotBox, messages, setMessages, schedule }: BotProps) {
+export default function Bot({ botBox, setBotBox, messages, setMessages, schedule, setSchedule }: BotProps) {
   
   // Allows to get an Element Reference which we can use - React DOM related
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -39,46 +42,27 @@ export default function Bot({ botBox, setBotBox, messages, setMessages, schedule
       setMessages(prev => [...prev, { fromUser: true, text: userMessage }]);
 
       // Fromatting Schedule before parsing to API
-      const formattedSchedule = schedule.map(day => ({
-        day: day.day,
-        totalTime: day.totalTime,
-        scenes: day.scenes.map(s => ({
-          scene_number: s.scene_number,
-          scene_heading: s.scene_heading,
-          location_type: s.location_type,
-          location_name: s.location_name,
-          sub_location_name: s.sub_location_name,
-          time_of_day: s.time_of_day,
-          characters: s.characters,
-          ...(s.props?.length && { props: s.props }),
-          ...(s.wardrobe?.length && { wardrobe: s.wardrobe }),
-          ...(s.set_dressing?.length && { set_dressing: s.set_dressing }),
-          ...(s.vehicles?.length && { vehicles: s.vehicles }),
-          ...(s.vfx?.length && { vfx: s.vfx }),
-          ...(s.sfx?.length && { sfx: s.sfx }),
-          ...(s.stunts?.length && { stunts: s.stunts }),
-          ...(s.extras?.length && { extras: s.extras }),
-          scene_summary: s.scene_summary,
-          estimatedTime: s.estimatedTime
-        }))
-      }));
+      const formattedSchedule = formatScheduleForAI(schedule);
 
-      const response = await fetch("/api/ai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          history: messages.slice(-5),
-          userMessage, // whatever the user typed
-          formattedSchedule
-        }),
-      });      
-      
+      const response = await authFetch("/api/ai", {
+        history: messages.slice(-5),
+        userMessage, // whatever the user typed
+        formattedSchedule
+      });
+
       const result = await response.json();
-      const aiResponse = result.aiResponse;
+
+      if (!response.ok || !result.aiResponse) {
+        setMessages(prev => [...prev, { fromUser: false, text: "Sorry, something went wrong processing that. Please try again." }]);
+        return;
+      }
+
+      const aiResponse: AIResponseType = result.aiResponse;
 
       setMessages(prev => [...prev, { fromUser: false, text: aiResponse.response }]);
+
+      const updatedSchedule = applyAgentAction(schedule, aiResponse);
+      if (updatedSchedule) setSchedule(updatedSchedule);
 
       const element = document.getElementById("messageDisplay") as HTMLDivElement;
       element.scrollTop = element.scrollHeight;

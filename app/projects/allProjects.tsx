@@ -12,12 +12,13 @@ interface AllProjectsProps {
     setUserProjects: React.Dispatch<React.SetStateAction<UserProjectsType[]>>;
     setAddProject: React.Dispatch<React.SetStateAction<boolean>>;
     setSelectedProjectId: React.Dispatch<React.SetStateAction<null | number>>
+    userId?: string;
 }
 
-export function AllProjects({userProjects, setUserProjects, setAddProject, setSelectedProjectId}: AllProjectsProps){
-    
+export function AllProjects({userProjects, setUserProjects, setAddProject, setSelectedProjectId, userId}: AllProjectsProps){
+
     const [currentProject, setCurrentProject] = useState<UserProjectsType>();
-    
+
     function openProject(projectId: number){
         setAddProject(false)
         setSelectedProjectId(projectId);
@@ -30,10 +31,12 @@ export function AllProjects({userProjects, setUserProjects, setAddProject, setSe
     }
 
     async function handleDelete(projectId: string){
-        const {data, error} = await supabase
+        if (!userId) return;
+        const {error} = await supabase
             .from('Projects')
             .delete()
-            .eq('id', projectId);
+            .eq('id', projectId)
+            .eq('uid', userId);
 
         if (!error){
             setUserProjects(prev => prev.filter(project => project.id != projectId))
@@ -142,11 +145,12 @@ export function AllProjects({userProjects, setUserProjects, setAddProject, setSe
                 <EditProjectModal
                     editModalDisplay={editModalDisplay}
                     setEditModalDisplay={setEditModalDisplay}
-                    setUserProjects = {setUserProjects} 
+                    setUserProjects = {setUserProjects}
                     projectId={currentProject!.id}
                     name={currentProject!.name}
                     type={currentProject!.type}
                     description={currentProject!.description}
+                    userId={userId}
                 />
             )}
 

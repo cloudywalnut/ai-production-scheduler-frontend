@@ -58,16 +58,20 @@ export default function Project() {
   }
 
   async function updateProfile(){
+    if (!user) return;
     const { error } = await supabase
     .from('Users')
     .update({
         name,
         organization
     })
-    .eq('uid', user!.id) // Will not be null as user only if signed up will be able to view
-    
+    .eq('uid', user.id)
+
     if (!error){
         alert("Congrats your profile has been updated successfully")
+    } else {
+        console.error(error);
+        alert("Sorry, we couldn't update your profile. Please try again.")
     }
   }
 
@@ -123,74 +127,91 @@ export default function Project() {
 
         {/* Profile Update Form Submission */}
         <div className="flex flex-col items-center justify-center">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Update Profile</h2>
-            <div className="w-full max-w-md border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="w-full max-w-md border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
-
-                {!changePasswordFlag && (
-                    <>
-                        {/* Name */}
-                        <div className="mb-4">
-                        <label className="text-sm text-black">Name</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        </div>
-
-                        {/* Organization */}
-                        <div className="mb-6">
-                            <label className="text-sm text-black">Organization</label>
-                            <input
-                                type="text"
-                                value={organization}
-                                onChange={e => setOrginization(e.target.value)}
-                                className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>                    
-                    </>
-                )}
-
-                {changePasswordFlag && (
-                <>
-                    {/* Password */}
-                    <div className="mb-6">
-                    <label className="text-sm text-black">Password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
-                        className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {passwordError && <p className="text-sm text-red-500 mt-1">{passwordError}</p>}
+                {/* Header */}
+                <div className="bg-linear-to-r from-[#1a0a0a] to-black px-6 py-8 flex flex-col items-center text-center">
+                    <div className="w-16 h-16 rounded-full bg-[#9b1c1c] flex items-center justify-center text-white text-2xl font-bold mb-3">
+                        {name ? name.charAt(0).toUpperCase() : <UserIcon className="w-8 h-8" />}
                     </div>
-                </>
-                )}
-
-                {/* Buttons */}
-                <div className="flex gap-3">
-
-                    {!changePasswordFlag && (
-                        <button
-                            className="flex-1 bg-blue-600 text-white py-2 rounded-md cursor-pointer hover:bg-blue-700 transition"
-                            onClick={updateProfile}
-                        >
-                            Update Profile
-                        </button>
-                    )}
-
-                    <button
-                        className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-md cursor-pointer hover:bg-gray-300 transition"
-                        onClick={() => changePasswordFlag ? changePassword() : setChangePasswordFlag(true)}
-                    >
-                        {changePasswordFlag ? "Update Password": "Change Password"}
-                    </button>
+                    <h2 className="text-lg font-semibold text-white">{name || "Your Profile"}</h2>
+                    {user?.email && <p className="text-sm text-gray-400 mt-0.5">{user.email}</p>}
                 </div>
 
+                <div className="p-6">
+
+                    {!changePasswordFlag && (
+                        <>
+                            {/* Name */}
+                            <div className="mb-4">
+                            <label className="text-sm text-black">Name</label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                                className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black/20 transition"
+                            />
+                            </div>
+
+                            {/* Organization */}
+                            <div className="mb-6">
+                                <label className="text-sm text-black">Organization</label>
+                                <input
+                                    type="text"
+                                    value={organization}
+                                    onChange={e => setOrginization(e.target.value)}
+                                    className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black/20 transition"
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    {changePasswordFlag && (
+                    <>
+                        {/* Password */}
+                        <div className="mb-2">
+                        <label className="text-sm text-black">New Password</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
+                            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black/20 transition"
+                        />
+                        {passwordError && <p className="text-sm text-red-500 mt-1">{passwordError}</p>}
+                        </div>
+                        <button
+                            type="button"
+                            className="block text-xs text-gray-400 hover:text-[#9b1c1c] transition mb-4 cursor-pointer"
+                            onClick={() => { setChangePasswordFlag(false); setPassword(""); setPasswordError(""); }}
+                        >
+                            ← Back to Profile
+                        </button>
+                    </>
+                    )}
+
+                    {/* Buttons */}
+                    <div className="flex gap-3">
+
+                        {!changePasswordFlag && (
+                            <button
+                                className="flex-1 bg-black text-white py-2 rounded-md cursor-pointer hover:bg-gray-800 transition"
+                                onClick={updateProfile}
+                            >
+                                Update Profile
+                            </button>
+                        )}
+
+                        <button
+                            className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-md cursor-pointer hover:bg-gray-200 transition"
+                            onClick={() => changePasswordFlag ? changePassword() : setChangePasswordFlag(true)}
+                        >
+                            {changePasswordFlag ? "Update Password": "Change Password"}
+                        </button>
+                    </div>
+
+                </div>
             </div>
-        </div>   
+        </div>
 
     </div>
 

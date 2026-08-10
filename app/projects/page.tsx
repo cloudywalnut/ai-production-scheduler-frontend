@@ -73,6 +73,9 @@ export default function Project() {
     if (!error){
       setAddProject(false)
       setUserProjects([...userProjects, data])
+    } else {
+      console.error(error);
+      alert("Sorry, we couldn't create your project. Please try again.");
     }
   }
 
@@ -238,7 +241,7 @@ export default function Project() {
 
           {/* View all Projects */}
           {!addProject && !selectedProjectId && (
-            <AllProjects userProjects={userProjects} setUserProjects={setUserProjects} setAddProject={setAddProject} setSelectedProjectId={setSelectedProjectId}/>
+            <AllProjects userProjects={userProjects} setUserProjects={setUserProjects} setAddProject={setAddProject} setSelectedProjectId={setSelectedProjectId} userId={user?.id}/>
           )}
 
           {/* Project Home */}

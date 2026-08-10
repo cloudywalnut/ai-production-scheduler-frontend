@@ -13,10 +13,11 @@ interface EditProjectModalProps {
     name: string;
     type: string;
     description: string;
+    userId?: string;
 }
 
 export default function EditProjectModal({ editModalDisplay, setEditModalDisplay, setUserProjects,
-    projectId, name, type, description }: EditProjectModalProps) {
+    projectId, name, type, description, userId }: EditProjectModalProps) {
 
     const [projectName, setProjectName] = useState<string>(name);
     const [projectType, setProjectType] = useState<string>(type);
@@ -24,16 +25,16 @@ export default function EditProjectModal({ editModalDisplay, setEditModalDisplay
 
     // Function to Edit the Project
     async function editProject(){
-        const {data, error} = await supabase
+        if (!userId) return;
+        const {error} = await supabase
             .from('Projects')
-            .update([
-            {
+            .update({
                 name: projectName,
                 type: projectType,
                 description: projectDescription
-            }
-            ])
-            .eq('id', projectId);
+            })
+            .eq('id', projectId)
+            .eq('uid', userId);
 
         if (!error){
             // To update the Parent
@@ -46,7 +47,7 @@ export default function EditProjectModal({ editModalDisplay, setEditModalDisplay
             setEditModalDisplay(false);
             alert("Project Details Updated Successfully");
         }else{
-            alert("Project Details Updated Successfully");
+            alert("Failed to update project details. Please try again.");
         }
     }
 
@@ -65,13 +66,13 @@ export default function EditProjectModal({ editModalDisplay, setEditModalDisplay
                                 type="text"
                                 value={projectName}
                                 onChange={(e) => {setProjectName(e.target.value)}}
-                                className="w-full border border-gray-400 rounded-md px-3 py-2 text-sm"
+                                className="w-full border border-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/20 transition"
                             />
                         </div>
 
                         <div>
                             <label className="text-sm font-semibold text-gray-800 mb-1 block">Type</label>
-                            <select className="w-full border border-gray-400 rounded-md px-3 py-2 text-sm bg-white" 
+                            <select className="w-full border border-gray-400 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black/20 transition"
                             value={projectType} onChange={(e) => {setProjectType(e.target.value)}}
                             >
                                 <option>Film</option>
@@ -85,7 +86,7 @@ export default function EditProjectModal({ editModalDisplay, setEditModalDisplay
                             <textarea
                                 value={projectDescription}
                                 onChange={(e) => {setProjectDescription(e.target.value)}}
-                                className="w-full border border-gray-400 rounded-md px-3 py-2 text-sm resize-none"
+                                className="w-full border border-gray-400 rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-black/20 transition"
                                 rows={4}
                             />
                         </div>
@@ -94,7 +95,7 @@ export default function EditProjectModal({ editModalDisplay, setEditModalDisplay
 
                     <div className="flex gap-3 mt-6">
                         <button
-                            className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-md transition cursor-pointer"
+                            className="bg-black hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-md transition cursor-pointer"
                             onClick={() => editProject()}
                         >
                             Save

@@ -27,10 +27,8 @@ export default function AuthPage() {
     if (!error) router.replace("/projects");
   }
 
-  // For creating the user in the database - fix this tomorrow
-  // Passing dummy in the uid for now
   async function createUser(userId: string){
-    await supabase
+    const { error } = await supabase
     .from('Users')
     .insert([
       {
@@ -39,6 +37,10 @@ export default function AuthPage() {
         organization,
       }
     ]);
+
+    if (error) {
+      console.error(error);
+    }
   }
 
   const signUp = async (e: React.FormEvent) => {
@@ -53,10 +55,15 @@ export default function AuthPage() {
     setLoading(true)
 
     const { data: {user}, error: signupError } = await supabase.auth.signUp({ email, password })
-    if (signupError) setError(signupError.message)
     setLoading(false)
+
+    if (signupError || !user) {
+      setError(signupError?.message ?? 'Something went wrong while creating your account')
+      return
+    }
+
     setSignUpFlag(false)
-    createUser(user!.id); // It will be available always if signup is successful
+    createUser(user.id);
   }
 
   return (

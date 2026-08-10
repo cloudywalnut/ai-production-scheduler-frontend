@@ -14,6 +14,7 @@ import * as XLSX from "xlsx";
 import Voice from "./voice";
 import Bot from "./bot";
 import { MessagesType } from "../types/types";
+import { authFetch } from "../utils/authFetch";
 
 export default function HomeClient() {
 
@@ -92,15 +93,21 @@ export default function HomeClient() {
       alert("Nothing to save");
       return;
     }
+    if (!user) return;
     if (currentScriptId){
-      await supabase
+      const { error } = await supabase
         .from('Scripts')
-        .update([
-          {
-            script: scenesData,
-          }
-        ])
-        .eq('id', currentScriptId);
+        .update({
+          script: scenesData,
+        })
+        .eq('id', currentScriptId)
+        .eq('uid', user.id);
+
+      if (error) {
+        console.error(error);
+        alert("Sorry, we couldn't save your script. Please try again.");
+        return;
+      }
     }else{
       const {data, error} = await supabase
         .from('Scripts')
@@ -112,57 +119,73 @@ export default function HomeClient() {
             project_id: projectId
           }
         ]).select('id, script_name').single();
-    
+
       if (error) {
         console.error(error);
-      } else {
-        const insertedId = data.id;
-        setCurrentScriptId(insertedId);
-        setSavedScripts(prev => [...prev, data]) // updating in place else it will update only on reload
+        alert("Sorry, we couldn't save your script. Please try again.");
+        return;
       }
 
+      const insertedId = data.id;
+      setCurrentScriptId(insertedId);
+      setSavedScripts(prev => [...prev, data]) // updating in place else it will update only on reload
     }
-    alert("Congrats Your Script has Been Saved Successfully");  
+    alert("Congrats Your Script has Been Saved Successfully");
   }
 
   const updateSchedule = async () =>{
-    if (currentScriptId){
-      await supabase
-        .from('Scripts')
-        .update([
-          {
-            scheduled_script: schedule,
-          }
-        ])
-        .eq('id', currentScriptId);
+    if (!user || !currentScriptId) return;
+
+    const { error } = await supabase
+      .from('Scripts')
+      .update({
+        scheduled_script: schedule,
+      })
+      .eq('id', currentScriptId)
+      .eq('uid', user.id);
+
+    if (error) {
+      console.error(error);
+      alert("Sorry, we couldn't update your schedule. Please try again.");
+      return;
     }
-    alert("Congrats Your Schedule has Been Updated Successfully");  
+    alert("Congrats Your Schedule has Been Updated Successfully");
   }
 
   const deleteScript = async () =>{
-    await supabase
+    if (!user) return;
+    const { error } = await supabase
       .from('Scripts')
       .delete()
-      .eq('id', currentScriptId);
+      .eq('id', currentScriptId)
+      .eq('uid', user.id);
+
+    if (error) {
+      console.error(error);
+      alert("Sorry, we couldn't delete your script. Please try again.");
+      return;
+    }
 
     setSavedScripts(prev => prev.filter(script => Number(script.id) != currentScriptId)) // updating in place else it will update only on reload
     setScenesData([]);
     setCurrentScriptId(null);
     setLoading(true);
     setFile(null);
-    alert("Your Script has Been Deleted Successfully");  
+    alert("Your Script has Been Deleted Successfully");
   }
 
 
   const loadSavedScript = async (script_id: number) => {
+    if (!user) return;
     const { data, error } = await supabase
       .from("Scripts")
       .select("script")
       .eq("id", script_id)
+      .eq("uid", user.id)
       .single();
 
     if (!error) {
-      
+
       setCurrentScriptId(script_id);
       setScenesData(data.script);
       setLoading(false);
@@ -213,44 +236,58 @@ export default function HomeClient() {
     const formData = new FormData();
     formData.append("script", selectedFile); // key must match server-side multer field
 
-    fetch("https://vodstr.up.railway.app/extract", {
+    fetch('https://vodstr.up.railway.app/extract', {
+    // fetch("http://localhost:5000/extract", {
       method: "POST",
       body: formData
     })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error(`Extraction failed with status ${res.status}`);
+      return res.json();
+    })
     .then(data => {
       setScenesData(data.scenesData);
       setLoading(false);
       setCurrentScriptId(null); // Set to null here again in case someone opened an existing script during loading
       setSchedule([]);
     })
-    .catch(err => console.error(err));
+    .catch(err => {
+      console.error(err);
+      setLoading(false);
+      setFile(null);
+      alert("Sorry, we couldn't process that script. Please try again.");
+    });
   };
 
 
-  function generateSchedule(scriptId: number | null) {
+  async function generateSchedule(scriptId: number | null) {
     if (scriptId === null) return;
 
-    fetch("/api/generateSchedule", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ scriptId }),
-    })
-      .then(() => {
-        alert("Congrats, The Schedule of you script is Generated Successfully");
-        getSchedule(scriptId).then((schedule) => {setSchedule(schedule ?? []);});
-      })
-      .catch(err => console.error(err));
+    try {
+      const response = await authFetch("/api/generateSchedule", { scriptId });
+      const result = await response.json();
+
+      if (!response.ok || !result.schedule) {
+        alert("Sorry, we couldn't generate the schedule. Please try again.");
+        return;
+      }
+
+      setSchedule(result.schedule);
+      alert("Congrats, The Schedule of you script is Generated Successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Sorry, we couldn't generate the schedule. Please try again.");
+    }
   }
 
 
   async function getSchedule(scriptId: number){
+    if (!user) return null;
     const { data, error } = await supabase
       .from("Scripts")
       .select("scheduled_script")
       .eq("id", scriptId)
+      .eq("uid", user.id)
       .single();
 
     if (error) {

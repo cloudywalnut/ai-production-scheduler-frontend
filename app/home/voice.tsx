@@ -5,6 +5,9 @@
 // this means that even if the value changes the changes wont be like visible in UI as there is no re render
 import { useState, useRef } from "react";
 import { AIResponseType, MessagesType, ShootingDay } from "../types/types";
+import { authFetch } from "../utils/authFetch";
+import { formatScheduleForAI } from "../utils/formatSchedule";
+import { applyAgentAction } from "../utils/applyAgentAction";
 
 
 interface VoiceProps {
@@ -19,6 +22,7 @@ export default function Voice({messages, setMessages, schedule, setSchedule}: Vo
 
   const [recording, setRecording] = useState(false);
   const [aiTalking, setAiTalking] = useState(false);
+  const [processing, setProcessing] = useState(false); // true from "stop recording" until the AI reply starts speaking
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -62,8 +66,11 @@ export default function Voice({messages, setMessages, schedule, setSchedule}: Vo
         setMessages(prev => [...prev, { fromUser: true, text: data.text }]);
         agentResponse(data.text)
       })
-      .catch(console.error);
-      
+      .catch(err => {
+        console.error(err);
+        setProcessing(false);
+      });
+
       setAudioURL(url);
 
     };
@@ -76,6 +83,7 @@ export default function Voice({messages, setMessages, schedule, setSchedule}: Vo
   const stopRecording = () => {
     mediaRecorderRef.current?.stop();
     setRecording(false);
+    setProcessing(true); // waiting on transcription + AI reply now
   };
 
   // To stop ai from speaking
@@ -88,51 +96,34 @@ export default function Voice({messages, setMessages, schedule, setSchedule}: Vo
   // Set the Agent Behaviour over here
   const agentResponse = (userMessage: string) => {
     
-    const formattedSchedule = schedule.map(day => ({
-      day: day.day,
-      totalTime: day.totalTime,
-      scenes: day.scenes.map(s => ({
-        scene_number: s.scene_number,
-        scene_heading: s.scene_heading,
-        location_type: s.location_type,
-        location_name: s.location_name,
-        sub_location_name: s.sub_location_name,
-        time_of_day: s.time_of_day,
-        characters: s.characters,
-        ...(s.props?.length && { props: s.props }),
-        ...(s.wardrobe?.length && { wardrobe: s.wardrobe }),
-        ...(s.set_dressing?.length && { set_dressing: s.set_dressing }),
-        ...(s.vehicles?.length && { vehicles: s.vehicles }),
-        ...(s.vfx?.length && { vfx: s.vfx }),
-        ...(s.sfx?.length && { sfx: s.sfx }),
-        ...(s.stunts?.length && { stunts: s.stunts }),
-        ...(s.extras?.length && { extras: s.extras }),
-        scene_summary: s.scene_summary,
-        estimatedTime: s.estimatedTime
-      }))
-    }));
+    const formattedSchedule = formatScheduleForAI(schedule);
 
-    fetch("/api/ai", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ 
-        history: messages.slice(-5),
-        userMessage,
-        formattedSchedule
-      }),
+    authFetch("/api/ai", {
+      history: messages.slice(-5),
+      userMessage,
+      formattedSchedule
     })
-    .then(res => res.json())
-    .then((data) => {
+    .then(async (res) => {
+      const data = await res.json();
+      if (!res.ok || !data.aiResponse) {
+        setProcessing(false);
+        setMessages(prev => [...prev, { fromUser: false, text: "Sorry, something went wrong processing that. Please try again." }]);
+        return;
+      }
 
-      const aiResponse = data.aiResponse;
+      const aiResponse: AIResponseType = data.aiResponse;
       setMessages(prev => [...prev, { fromUser: false, text: aiResponse.response }]);
+      setProcessing(false);
       genVoiceOutput(aiResponse.response)
-      agentAction(aiResponse)
+
+      const updatedSchedule = applyAgentAction(schedule, aiResponse);
+      if (updatedSchedule) setSchedule(updatedSchedule);
 
     })
-    .catch(err => console.error(err));
+    .catch(err => {
+      console.error(err);
+      setProcessing(false);
+    });
 
   }
 
@@ -148,43 +139,26 @@ export default function Voice({messages, setMessages, schedule, setSchedule}: Vo
       utterance.rate = 1.2;
       utterance.pitch = 1.8;
       utterance.lang = "en-US";
-      
+
+      // Without these, the button stays stuck on "Stop Agent" after speech ends naturally
+      utterance.onend = () => setAiTalking(false);
+      utterance.onerror = () => setAiTalking(false);
+
       synth.cancel();
       synth.speak(utterance);
   }
-
-  // Set which function the agent calls over here.
-  const agentAction = (aiResponse: AIResponseType) => {
-    if (aiResponse.swap_type == "none") return;
-    if (aiResponse.swap_type == "move"){
-      const {day_from, day_to, scene_active}= aiResponse
-      if (day_from && day_to && scene_active){        
-        const updatedSchedule = schedule.map(day => ({
-            ...day,
-            scenes: [...day.scenes]
-        }));
-        
-        // The main update logic
-        const scenesIndex = updatedSchedule[Number(day_from)-1].scenes.findIndex(s => s.scene_number == scene_active)
-        const sceneContent = updatedSchedule[Number(day_from)-1].scenes.splice(scenesIndex, 1)
-        updatedSchedule[Number(day_to)-1].scenes.push(sceneContent[0])
-        
-        setSchedule(updatedSchedule);
-      }
-    }
-  }
-
 
   return (
 
     <>
       <button
-        onClick={recording ? stopRecording : aiTalking ? stopAISpeaking : startRecording}
-        className={`rounded-2xl w-full mb-6 p-3 text-white font-bold cursor-pointer ${
-          recording ? "bg-red-500 hover:bg-red-600" : aiTalking ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-500 hover:bg-blue-600"
+        onClick={recording ? stopRecording : aiTalking ? stopAISpeaking : processing ? undefined : startRecording}
+        disabled={processing}
+        className={`rounded-2xl w-full mb-6 p-3 text-white font-bold ${processing ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${
+          recording ? "bg-red-500 hover:bg-red-600" : processing ? "bg-gray-400" : aiTalking ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-500 hover:bg-blue-600"
         }`}
       >
-        {recording ? "Stop Talking" : aiTalking ? "Stop Agent" : "Talk to Agent"}
+        {recording ? "Stop Talking" : processing ? "Processing…" : aiTalking ? "Stop Agent" : "Talk to Agent"}
       </button>
 
       {/* {audioURL && (

@@ -1,5 +1,6 @@
 import { MessagesType } from "@/app/types/types";
 import { encode, decode } from '@toon-format/toon';
+import { supabase } from "@/app/utils/supabase";
 
 import OpenAI from "openai";
 const client = new OpenAI();
@@ -37,9 +38,25 @@ Do not ask redundant questions; act and advise as a professional with schedule k
 `;
 
 export async function POST(req: Request) {
-  
+
   try {
- 
+
+    // Require a logged-in Supabase user so this isn't a free, open proxy to our OpenAI account
+    const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const {history, userMessage, formattedSchedule} = await req.json();
 
     const systemPromptWithSchedule = systemPrompt + `\n\n This here is your current schedule: ${encode(formattedSchedule)}`

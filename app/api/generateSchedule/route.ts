@@ -213,12 +213,29 @@ function sortScenesByLocationType(scenes: SceneRow[]) {
 
 export async function POST(req: Request) {
   try {
+    // Require a logged-in Supabase user, and only ever touch scripts they own
+    const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const {scriptId} = await req.json();
 
     const { data, error } = await supabase
     .from('Scripts')
     .select('script')
     .eq('id', scriptId)
+    .eq('uid', user.id)
     .single(); // 👈 key part
 
     if (error || !data?.script) {
@@ -230,10 +247,11 @@ export async function POST(req: Request) {
     await supabase
     .from('Scripts')
     .update({ scheduled_script: scheduled })
-    .eq('id', scriptId);
+    .eq('id', scriptId)
+    .eq('uid', user.id);
 
     return new Response(
-      JSON.stringify({ success: true }), // convert object to JSON
+      JSON.stringify({ success: true, schedule: scheduled }), // convert object to JSON
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
